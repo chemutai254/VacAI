@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
@@ -19,6 +20,7 @@ import { validatePassword } from "@/utils/password";
 
 export default function AuthScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
   const { signup } = useAuth();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -65,6 +67,10 @@ export default function AuthScreen() {
       setError("Failed to sign up. Please try again.");
       setIsLoading(false);
     }
+  };
+
+  const handleSignIn = () => {
+    navigation.navigate("Login" as never);
   };
 
   return (
@@ -253,6 +259,31 @@ export default function AuthScreen() {
                 We'll request your location to provide relevant health resources for your area
               </ThemedText>
             </View>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <ThemedText style={styles.dividerText}>or</ThemedText>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.secondaryButton,
+                {
+                  borderColor: Colors.light.primary,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+              onPress={handleSignIn}
+              disabled={isLoading}
+            >
+              <ThemedText
+                type="body"
+                style={[styles.secondaryButtonText, { color: Colors.light.primary }]}
+              >
+                Already have an account? Sign In
+              </ThemedText>
+            </Pressable>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -341,6 +372,32 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
     opacity: 0.8,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: Spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(128, 128, 128, 0.2)",
+  },
+  dividerText: {
+    paddingHorizontal: Spacing.md,
+    opacity: 0.5,
+    fontSize: 14,
+  },
+  secondaryButton: {
+    height: Spacing.buttonHeight,
+    borderRadius: BorderRadius.button,
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  secondaryButtonText: {
+    fontWeight: "600",
   },
   eyeIcon: {
     position: "absolute",
