@@ -39,10 +39,12 @@ export default function ChatScreen() {
   const [showSources, setShowSources] = useState(false);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [showUnsafeWarning, setShowUnsafeWarning] = useState(false);
+  const [bookmarkedMessageIds, setBookmarkedMessageIds] = useState<string[]>([]);
 
   useEffect(() => {
     loadChatHistory();
     checkHowToUseDismissed();
+    loadBookmarkedMessages();
   }, []);
 
   const loadChatHistory = async () => {
@@ -59,6 +61,20 @@ export default function ChatScreen() {
   const checkHowToUseDismissed = async () => {
     const dismissed = await storage.getHowToUseDismissed();
     setShowHowToUse(!dismissed);
+  };
+
+  const loadBookmarkedMessages = async () => {
+    const bookmarked = await storage.getBookmarkedMessages();
+    setBookmarkedMessageIds(bookmarked);
+  };
+
+  const toggleBookmark = async (messageId: string) => {
+    const newBookmarks = bookmarkedMessageIds.includes(messageId)
+      ? bookmarkedMessageIds.filter(id => id !== messageId)
+      : [...bookmarkedMessageIds, messageId];
+    
+    setBookmarkedMessageIds(newBookmarks);
+    await storage.setBookmarkedMessages(newBookmarks);
   };
 
   const dismissHowToUse = async () => {
@@ -175,6 +191,7 @@ export default function ChatScreen() {
           {messages.map((message) => (
             <ChatBubble
               key={message.id}
+              id={message.id}
               role={message.role}
               content={message.content}
               confidence={message.confidence}
@@ -182,6 +199,8 @@ export default function ChatScreen() {
               onCiteSources={() =>
                 message.sources && handleCiteSources(message.sources)
               }
+              isBookmarked={bookmarkedMessageIds.includes(message.id)}
+              onToggleBookmark={toggleBookmark}
             />
           ))}
 

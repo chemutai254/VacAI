@@ -10,19 +10,25 @@ import * as Speech from "expo-speech";
 import * as Haptics from "expo-haptics";
 
 interface ChatBubbleProps {
+  id: string;
   role: "user" | "assistant";
   content: string;
   confidence?: "high" | "medium" | "low";
   sources?: string[];
   onCiteSources?: () => void;
+  isBookmarked?: boolean;
+  onToggleBookmark?: (id: string) => void;
 }
 
 export default function ChatBubble({
+  id,
   role,
   content,
   confidence,
   sources,
   onCiteSources,
+  isBookmarked = false,
+  onToggleBookmark,
 }: ChatBubbleProps) {
   const { theme } = useTheme();
   const { t } = useLanguage();
@@ -41,6 +47,11 @@ export default function ChatBubble({
     onCiteSources?.();
   };
 
+  const handleToggleBookmark = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    onToggleBookmark?.(id);
+  };
+
   return (
     <View style={[styles.container, isUser ? styles.userContainer : styles.assistantContainer]}>
       <View
@@ -52,7 +63,12 @@ export default function ChatBubble({
         ]}
       >
         <ThemedText
-          style={[styles.text, isUser && { color: "#FFFFFF" }]}
+          style={[
+            styles.text, 
+            isUser 
+              ? { color: "#FFFFFF" } 
+              : { color: "#1A1A1A" }
+          ]}
         >
           {content}
         </ThemedText>
@@ -92,6 +108,26 @@ export default function ChatBubble({
             >
               <ThemedText style={styles.actionText}>
                 {t("citeSources")}
+              </ThemedText>
+            </Pressable>
+          )}
+
+          {!isUser && onToggleBookmark && (
+            <Pressable
+              onPress={handleToggleBookmark}
+              style={({ pressed }) => [
+                styles.actionButton,
+                pressed && styles.pressed,
+              ]}
+            >
+              <Feather 
+                name={isBookmarked ? "bookmark" : "bookmark"} 
+                size={16} 
+                color={Colors.light.primary}
+                fill={isBookmarked ? Colors.light.primary : "none"}
+              />
+              <ThemedText style={styles.actionText}>
+                {isBookmarked ? t("bookmarked") : t("bookmark")}
               </ThemedText>
             </Pressable>
           )}

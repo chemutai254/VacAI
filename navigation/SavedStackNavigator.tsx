@@ -2,6 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SavedScreen from "@/screens/SavedScreen";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export type SavedStackParamList = {
   Saved: undefined;
@@ -17,6 +18,7 @@ export default function SavedStackNavigator() {
         component={SavedScreen}
         options={{
           title: "Saved",
+          headerRight: () => <LanguageSwitcher />,
         }}
       />
     </Stack.Navigator>

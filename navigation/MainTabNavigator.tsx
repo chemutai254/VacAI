@@ -53,7 +53,7 @@ export default function MainTabNavigator() {
         options={{
           title: "Home",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="message-circle" size={size} color={color} />
+            <Feather name="home" size={size} color={color} />
           ),
         }}
       />
@@ -63,7 +63,7 @@ export default function MainTabNavigator() {
         options={{
           title: "Resources",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="book-open" size={size} color={color} />
+            <Feather name="shield" size={size} color={color} />
           ),
         }}
       />

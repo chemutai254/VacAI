@@ -4,6 +4,7 @@ const KEYS = {
   LANGUAGE: "@vaccine_village:language",
   LANGUAGE_SELECTED: "@vaccine_village:language_selected",
   BOOKMARKED_RESOURCES: "@vaccine_village:bookmarked_resources",
+  BOOKMARKED_MESSAGES: "@vaccine_village:bookmarked_messages",
   CHAT_HISTORY: "@vaccine_village:chat_history",
   DATA_CONSENT: "@vaccine_village:data_consent",
   HOW_TO_USE_DISMISSED: "@vaccine_village:how_to_use_dismissed",
@@ -118,6 +119,27 @@ export const storage = {
       await AsyncStorage.setItem(KEYS.HOW_TO_USE_DISMISSED, String(dismissed));
     } catch (error) {
       console.error("Error setting how to use dismissed:", error);
+    }
+  },
+
+  async getBookmarkedMessages(): Promise<string[]> {
+    try {
+      const value = await AsyncStorage.getItem(KEYS.BOOKMARKED_MESSAGES);
+      return value ? JSON.parse(value) : [];
+    } catch (error) {
+      console.error("Error getting bookmarked messages:", error);
+      return [];
+    }
+  },
+
+  async setBookmarkedMessages(messageIds: string[]): Promise<void> {
+    try {
+      await AsyncStorage.setItem(
+        KEYS.BOOKMARKED_MESSAGES,
+        JSON.stringify(messageIds)
+      );
+    } catch (error) {
+      console.error("Error setting bookmarked messages:", error);
     }
   },
 };
