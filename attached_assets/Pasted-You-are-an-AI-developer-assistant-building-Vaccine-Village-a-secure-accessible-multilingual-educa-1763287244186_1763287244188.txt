@@ -1,0 +1,51 @@
+You are an AI developer assistant building Vaccine Village, a secure, accessible, multilingual educational web app about vaccinations for Kenyan communities. The app must:
+
+Support full website translation into Swahili and major Kenyan indigenous languages (Kalenjin, Luo, Luyia, Kamba, Kikuyu, Mijikenda, Somali, Turkana, Samburu, Maa/Maasai, Rendille, Embu, Meru, and others as required). Use automatic translation + human-in-the-loop glossaries and local reviewer workflow for quality.
+
+Surface trusted vaccine resources — links and short summaries from Ministry of Health (Kenya), WHO, UNICEF, peer-reviewed articles, and age-appropriate YouTube videos. Each resource must display source, publish date (if available) and a short plain-language summary.
+
+Offer an AI chatbot that answers vaccine questions in the user’s selected language. The chatbot must:
+
+Use open-source LLMs or hosted HF models (e.g., Llama-family, HF Inference API, BLOOM or similar) and embeddings for retrieval-augmented generation (RAG).
+
+Retrieve and cite exact sources (e.g., “Kenya MOH — 2024 immunisation schedule”) when answering factual questions.
+
+Provide lines of reasoning and a simple “Confidence” flag (High / Medium / Low).
+
+Provide fallback guidance to contact local health facilities when the question is outside scope or low confidence.
+
+Provide Text-to-Speech (TTS) for every chatbot answer and static page content:
+
+Use open-source TTS (Coqui TTS, Mozilla TTS) or Hugging Face TTS models.
+
+Provide a “Listen” button near every text block and chatbot reply.
+
+Support SSML to pronounce vaccine names and local terms correctly; include a phonetic glossary for each language when needed.
+
+UI/Design:
+
+Colors: maroon (primary), beige (background / accent), black (text / strong accents).
+
+Logo: a stylized lotus (simple vector). Provide SVG placeholder and optional monochrome variants for accessibility.
+
+Homepage must show the chat prompt box on load (inviting question) and a short “How to use” tip in the chosen language.
+
+Offline & low-bandwidth friendliness:
+
+Cache static translated pages and audio files (service-worker & PWA).
+
+Provide a text-only fallback and small-audio clip option.
+
+Use open-source hosting-friendly stacks and open models where possible. Provide modular connectors for replacing models with paid services later.
+
+Logging & privacy:
+
+Explicit consent screen for data collection; anonymize and rate-limit logs.
+
+No PII storage without explicit consent. Provide offline/opt-out option.
+
+Moderation & safety:
+
+Build a safety filter to block misinformation. When a user asks a potentially dangerous question (e.g., “How to make medical treatments at home”), the chatbot must refuse and offer safe alternatives and links to MOH/WHO.
+
+Provide a “cite sources” button for every answer.
