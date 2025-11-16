@@ -16,20 +16,14 @@ import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@/contexts/AuthContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
-export default function AuthScreen() {
+export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const { login } = useAuth();
-  const [name, setName] = useState("");
+  const { loginWithPhone } = useAuth();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleLogin = async () => {
-    if (!name.trim()) {
-      setError("Please enter your name");
-      return;
-    }
-
     if (!phoneNumber.trim()) {
       setError("Please enter your phone number");
       return;
@@ -45,9 +39,13 @@ export default function AuthScreen() {
     setError("");
 
     try {
-      await login(phoneNumber.trim(), name.trim());
+      const success = await loginWithPhone(phoneNumber.trim());
+      if (!success) {
+        setError("Phone number not found. Please sign up first.");
+        setIsLoading(false);
+      }
     } catch (err) {
-      setError("Failed to sign in. Please try again.");
+      setError("Failed to log in. Please try again.");
       setIsLoading(false);
     }
   };
@@ -73,41 +71,14 @@ export default function AuthScreen() {
               style={styles.logo}
             />
             <ThemedText type="h1" style={styles.title}>
-              Create Account
+              Welcome Back
             </ThemedText>
             <ThemedText type="body" style={styles.subtitle}>
-              Join Vaccine Village to access trusted vaccine information
+              Log in to continue your vaccine education journey
             </ThemedText>
           </View>
 
           <View style={styles.form}>
-            <View style={styles.inputContainer}>
-              <Feather
-                name="user"
-                size={20}
-                color={Colors.light.mediumGray}
-                style={styles.inputIcon}
-              />
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    color: Colors.light.text,
-                    backgroundColor: Colors.light.backgroundDefault,
-                  },
-                ]}
-                placeholder="Your name"
-                placeholderTextColor={Colors.light.mediumGray}
-                value={name}
-                onChangeText={(text) => {
-                  setName(text);
-                  setError("");
-                }}
-                autoCapitalize="words"
-                editable={!isLoading}
-              />
-            </View>
-
             <View style={styles.inputContainer}>
               <Feather
                 name="phone"
@@ -162,7 +133,7 @@ export default function AuthScreen() {
                   type="body"
                   style={[styles.buttonText, { color: Colors.light.buttonText }]}
                 >
-                  Sign Up
+                  Log In
                 </ThemedText>
               )}
             </Pressable>
@@ -170,7 +141,7 @@ export default function AuthScreen() {
             <View style={styles.infoContainer}>
               <Feather name="info" size={16} color={Colors.light.info} />
               <ThemedText style={styles.infoText}>
-                We'll request your location to provide relevant health resources for your area
+                Enter the phone number you used to sign up
               </ThemedText>
             </View>
           </View>

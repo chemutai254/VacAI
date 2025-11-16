@@ -19,18 +19,21 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  hasExistingProfile: boolean;
   login: (phoneNumber: string, name: string) => Promise<void>;
+  loginWithPhone: (phoneNumber: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updateLocation: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const AUTH_STORAGE_KEY = "@vaccine_village_user";
+const USER_PROFILE_STORAGE_KEY = "@vaccine_village_user_profile";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasExistingProfile, setHasExistingProfile] = useState(false);
 
   useEffect(() => {
     loadUser();
@@ -38,12 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUser = async () => {
     try {
-      const userJson = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-      if (userJson) {
-        setUser(JSON.parse(userJson));
+      const profileJson = await AsyncStorage.getItem(USER_PROFILE_STORAGE_KEY);
+      if (profileJson) {
+        setHasExistingProfile(true);
       }
     } catch (error) {
-      console.error("Failed to load user:", error);
+      console.error("Failed to load user profile:", error);
     } finally {
       setIsLoading(false);
     }
@@ -76,7 +79,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       };
 
       setUser(updatedUser);
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updatedUser));
+      await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(updatedUser));
     } catch (error) {
       console.error("Failed to get location:", error);
       throw error;
@@ -109,17 +112,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log("Location capture failed during login, continuing without location:", locationError);
       }
 
+      await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(newUser));
       setUser(newUser);
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newUser));
+      setHasExistingProfile(true);
     } catch (error) {
-      console.error("Failed to login:", error);
+      console.error("Failed to signup:", error);
+      throw error;
+    }
+  };
+
+  const loginWithPhone = async (phoneNumber: string): Promise<boolean> => {
+    try {
+      const profileJson = await AsyncStorage.getItem(USER_PROFILE_STORAGE_KEY);
+      if (!profileJson) {
+        return false;
+      }
+
+      const profile: User = JSON.parse(profileJson);
+      
+      const normalizedInputPhone = phoneNumber.startsWith('+254') 
+        ? phoneNumber 
+        : phoneNumber.replace(/^0/, '+254');
+      const normalizedProfilePhone = profile.phoneNumber.startsWith('+254')
+        ? profile.phoneNumber
+        : profile.phoneNumber.replace(/^0/, '+254');
+
+      if (normalizedInputPhone !== normalizedProfilePhone) {
+        return false;
+      }
+
+      setUser(profile);
+      return true;
+    } catch (error) {
+      console.error("Failed to login with phone:", error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
       setUser(null);
     } catch (error) {
       console.error("Failed to logout:", error);
@@ -133,7 +164,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         isLoading,
         isAuthenticated: user !== null,
+        hasExistingProfile,
         login,
+        loginWithPhone,
         logout,
         updateLocation,
       }}

@@ -30,6 +30,7 @@ function AppContent() {
       language: 'Language',
       consent: 'Consent',
       auth: 'Auth',
+      login: 'Login',
       main: 'Main',
     };
 

@@ -5,6 +5,7 @@ import LandingScreen from '@/screens/LandingScreen';
 import LanguageSelectionScreen from '@/screens/LanguageSelectionScreen';
 import PrivacyConsentScreen from '@/screens/PrivacyConsentScreen';
 import AuthScreen from '@/screens/AuthScreen';
+import LoginScreen from '@/screens/LoginScreen';
 import MainTabNavigator from './MainTabNavigator';
 import { MainPhaseEffects } from '@/components/MainPhaseEffects';
 import { ThemedView } from '@/components/ThemedView';
@@ -16,6 +17,7 @@ export type RootStackParamList = {
   Language: undefined;
   Consent: undefined;
   Auth: undefined;
+  Login: undefined;
   Main: undefined;
 };
 
@@ -60,6 +62,7 @@ export default function RootStackNavigator({ phase }: RootStackNavigatorProps) {
       <Stack.Screen name="Language" component={LanguageSelectionScreen} />
       <Stack.Screen name="Consent" component={PrivacyConsentScreen} />
       <Stack.Screen name="Auth" component={AuthScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Main">
         {() => <MainScreenWrapper phase={phase} />}
       </Stack.Screen>
