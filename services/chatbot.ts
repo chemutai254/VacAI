@@ -9,24 +9,29 @@ export interface ChatMessage {
 
 const MOCK_RESPONSES: { [key: string]: { content: string; confidence: "high" | "medium" | "low"; sources: string[] } } = {
   default: {
-    content: "Vaccines are safe and effective ways to protect against serious diseases. They work by training your immune system to recognize and fight specific infections. All vaccines used in Kenya are approved by the Ministry of Health and WHO.",
+    content: "Vaccines are safe and effective ways to protect against serious diseases in Kenya. The Ministry of Health provides free vaccinations at over 7,000 public health facilities across all 47 counties. All vaccines used are WHO-prequalified and approved by the Pharmacy and Poisons Board.",
     confidence: "high",
     sources: ["Kenya MOH", "WHO"],
   },
   babies: {
-    content: "Babies need several vaccines starting from birth. The Kenya National Immunization Schedule includes BCG (at birth), Polio, Pentavalent (DPT-HepB-Hib), Pneumococcal, and Rotavirus vaccines at 6, 10, and 14 weeks. Measles vaccine is given at 9 months.",
+    content: "Kenya follows the National Immunization Schedule. Babies receive: BCG at birth, Polio (0-4 doses), Pentavalent/DPT-HepB-Hib (6, 10, 14 weeks), Pneumococcal (6, 10, 14 weeks), Rotavirus (6, 10 weeks), and Measles-Rubella at 9 and 18 months. All routine childhood vaccines are free at government facilities in Kenya.",
     confidence: "high",
-    sources: ["Kenya MOH - 2024 Immunization Schedule"],
+    sources: ["Kenya MOH - 2024 Immunization Schedule", "UNICEF Kenya"],
   },
   mmr: {
-    content: "The MMR vaccine is very safe. It protects against Measles, Mumps, and Rubella. Millions of doses have been safely administered worldwide. Common side effects are mild, such as slight fever or soreness at injection site, which resolve quickly.",
+    content: "The Measles-Rubella (MR) vaccine is very safe and widely used in Kenya. Over 20 million doses have been administered in Kenya since 2016. Side effects are typically mild - slight fever or rash that resolve within a few days. The vaccine prevents potentially fatal measles outbreaks common in East Africa.",
     confidence: "high",
-    sources: ["WHO", "Kenya MOH"],
+    sources: ["WHO", "Kenya MOH", "Kenyatta National Hospital"],
   },
   location: {
-    content: "You can get vaccinated at government health facilities, county hospitals, health centers, and dispensaries across Kenya. Most routine vaccinations are free at public health facilities. Contact your nearest health facility for specific vaccine availability.",
+    content: "Free vaccinations are available at: County referral hospitals (47 counties), Sub-county hospitals (over 400), Health centers (3,000+), and Dispensaries (4,000+). Major facilities include Kenyatta National Hospital (Nairobi), Moi Teaching and Referral Hospital (Eldoret), and Coast General Hospital (Mombasa). Visit your nearest facility or call Kenya Health InfoLine: 719 for locations.",
     confidence: "high",
-    sources: ["Kenya MOH"],
+    sources: ["Kenya MOH", "Kenya Health InfoLine"],
+  },
+  schedule: {
+    content: "The Kenya National Immunization Schedule: Birth (BCG, Polio 0), 6 weeks (Polio 1, Penta 1, PCV 1, Rota 1), 10 weeks (Polio 2, Penta 2, PCV 2, Rota 2), 14 weeks (Polio 3, Penta 3, PCV 3), 9 months (Measles-Rubella 1), 18 months (Measles-Rubella 2). Keep your child's immunization card safe and bring it to every clinic visit.",
+    confidence: "high",
+    sources: ["Kenya MOH - National Immunization Programme"],
   },
 };
 
@@ -39,11 +44,13 @@ export async function sendChatMessage(
   const lowerMessage = message.toLowerCase();
   let response = MOCK_RESPONSES.default;
 
-  if (lowerMessage.includes("bab") || lowerMessage.includes("child") || lowerMessage.includes("infant")) {
+  if (lowerMessage.includes("bab") || lowerMessage.includes("child") || lowerMessage.includes("infant") || lowerMessage.includes("watoto") || lowerMessage.includes("mtoto")) {
     response = MOCK_RESPONSES.babies;
-  } else if (lowerMessage.includes("mmr") || lowerMessage.includes("measles") || lowerMessage.includes("safe")) {
+  } else if (lowerMessage.includes("when") || lowerMessage.includes("schedule") || lowerMessage.includes("ratiba") || lowerMessage.includes("lini")) {
+    response = MOCK_RESPONSES.schedule;
+  } else if (lowerMessage.includes("mmr") || lowerMessage.includes("measles") || lowerMessage.includes("safe") || lowerMessage.includes("usalama")) {
     response = MOCK_RESPONSES.mmr;
-  } else if (lowerMessage.includes("where") || lowerMessage.includes("location") || lowerMessage.includes("get vaccin")) {
+  } else if (lowerMessage.includes("where") || lowerMessage.includes("location") || lowerMessage.includes("get vaccin") || lowerMessage.includes("wapi") || lowerMessage.includes("kituo")) {
     response = MOCK_RESPONSES.location;
   }
 

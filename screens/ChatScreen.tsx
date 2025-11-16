@@ -16,6 +16,10 @@ import { ThemedView } from "@/components/ThemedView";
 import { Card } from "@/components/Card";
 import ChatBubble from "@/components/ChatBubble";
 import QuickStartPrompt from "@/components/QuickStartPrompt";
+import { WelcomeCard } from "@/components/WelcomeCard";
+import { SuggestionChip } from "@/components/SuggestionChip";
+import { LanguageSelectorButton } from "@/components/LanguageSelectorButton";
+import LanguageSelector from "@/components/LanguageSelector";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { BorderRadius, Colors, Spacing } from "@/constants/theme";
@@ -29,7 +33,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const { t, language } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const { theme } = useTheme();
   const scrollViewRef = useRef<ScrollView>(null);
   const navigation = useNavigation();
@@ -42,6 +46,7 @@ export default function ChatScreen() {
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [showUnsafeWarning, setShowUnsafeWarning] = useState(false);
   const [bookmarkedMessages, setBookmarkedMessages] = useState<ChatMessage[]>([]);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
 
   useEffect(() => {
     loadChatHistory();
@@ -145,6 +150,24 @@ export default function ChatScreen() {
 
   const handleQuickPrompt = (text: string) => {
     setInputText(text);
+    setTimeout(() => {
+      handleSend();
+    }, 100);
+  };
+
+  const handleWelcomeCardPress = (topic: string) => {
+    const topicQuestions: { [key: string]: string } = {
+      babies: t("quickStartPrompt1"),
+      safety: t("quickStartPrompt2"),
+      locations: t("quickStartPrompt3"),
+    };
+    const question = topicQuestions[topic];
+    if (question) {
+      setInputText(question);
+      setTimeout(() => {
+        handleSend();
+      }, 100);
+    }
   };
 
   const handleCiteSources = (sources: string[]) => {
@@ -154,6 +177,10 @@ export default function ChatScreen() {
 
   return (
     <ThemedView style={styles.container}>
+      <View style={[styles.languageSelectorFixed, { top: insets.top + 60 + Spacing.md }]}>
+        <LanguageSelectorButton currentLanguage={language} onPress={() => setShowLanguageModal(true)} />
+      </View>
+
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.keyboardView}
@@ -168,41 +195,49 @@ export default function ChatScreen() {
           }}
           keyboardShouldPersistTaps="handled"
         >
-          {showHowToUse && (
-            <View style={styles.howToUseContainer}>
-              <Card style={styles.howToUseCard}>
-                <View style={styles.howToUseHeader}>
-                  <ThemedText style={styles.howToUseTitle}>
-                    {t("howToUse")}
-                  </ThemedText>
-                  <Pressable onPress={dismissHowToUse}>
-                    <Feather name="x" size={20} color={theme.text} />
-                  </Pressable>
-                </View>
-                <ThemedText style={styles.howToUseText}>
-                  {t("howToUseDescription")}
-                </ThemedText>
-              </Card>
-            </View>
-          )}
-
-          {messages.length === 0 && !showHowToUse && (
-            <View style={styles.quickPromptsContainer}>
-              <ThemedText style={styles.quickPromptsTitle}>
-                {t("askQuestion")}
+          {messages.length === 0 && (
+            <View style={styles.welcomeContainer}>
+              <ThemedText style={styles.welcomeTitle}>
+                {t("welcomeTitle")}
               </ThemedText>
-              <View style={styles.quickPrompts}>
-                <QuickStartPrompt
+              <ThemedText style={styles.welcomeSubtitle}>
+                {t("welcomeSubtitle")}
+              </ThemedText>
+
+              <View style={styles.topicCardsContainer}>
+                <WelcomeCard
+                  title={t("babyVaccines")}
+                  icon="heart"
+                  onPress={() => handleWelcomeCardPress("babies")}
+                />
+                <WelcomeCard
+                  title={t("vaccineSafety")}
+                  icon="shield"
+                  onPress={() => handleWelcomeCardPress("safety")}
+                />
+                <WelcomeCard
+                  title={t("vaccinationCenters")}
+                  icon="map-pin"
+                  onPress={() => handleWelcomeCardPress("locations")}
+                />
+              </View>
+
+              <View style={styles.suggestionChipsContainer}>
+                <SuggestionChip
                   text={t("quickStartPrompt1")}
-                  onPress={handleQuickPrompt}
+                  onPress={() => handleQuickPrompt(t("quickStartPrompt1"))}
                 />
-                <QuickStartPrompt
+                <SuggestionChip
                   text={t("quickStartPrompt2")}
-                  onPress={handleQuickPrompt}
+                  onPress={() => handleQuickPrompt(t("quickStartPrompt2"))}
                 />
-                <QuickStartPrompt
+                <SuggestionChip
                   text={t("quickStartPrompt3")}
-                  onPress={handleQuickPrompt}
+                  onPress={() => handleQuickPrompt(t("quickStartPrompt3"))}
+                />
+                <SuggestionChip
+                  text={t("quickStartPrompt4")}
+                  onPress={() => handleQuickPrompt(t("quickStartPrompt4"))}
                 />
               </View>
             </View>
@@ -345,6 +380,40 @@ export default function ChatScreen() {
           </View>
         </View>
       </Modal>
+
+      <Modal
+        visible={showLanguageModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <ThemedView
+          style={[
+            styles.modalContainer,
+            {
+              paddingTop: insets.top + Spacing.lg,
+              paddingBottom: insets.bottom + Spacing.lg,
+            },
+          ]}
+        >
+          <View style={styles.modalHeader}>
+            <ThemedText style={styles.modalTitle}>{t("language")}</ThemedText>
+            <Pressable onPress={() => setShowLanguageModal(false)}>
+              <Feather name="x" size={24} color={theme.text} />
+            </Pressable>
+          </View>
+          <ScrollView style={styles.modalContent}>
+            <LanguageSelector
+              selectedLanguage={language}
+              onSelectLanguage={async (lang) => {
+                await setLanguage(lang);
+                setShowLanguageModal(false);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }}
+            />
+          </ScrollView>
+        </ThemedView>
+      </Modal>
     </ThemedView>
   );
 }
@@ -380,6 +449,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     color: Colors.light.darkGray,
+  },
+  welcomeContainer: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    marginBottom: Spacing.sm,
+    textAlign: "center",
+  },
+  welcomeSubtitle: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: Colors.light.darkGray,
+    marginBottom: Spacing.xl,
+    textAlign: "center",
+  },
+  topicCardsContainer: {
+    marginBottom: Spacing.xl,
+  },
+  suggestionChipsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
   },
   quickPromptsContainer: {
     paddingHorizontal: Spacing.lg,
@@ -510,5 +603,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     textAlign: "center",
+  },
+  languageSelectorFixed: {
+    position: 'absolute',
+    right: Spacing.lg,
+    zIndex: 100,
+    maxWidth: 200,
   },
 });

@@ -3,200 +3,183 @@
 ## Architecture Decisions
 
 ### Authentication
-**No authentication required** - The app is a public education tool focused on accessibility.
-- Include a **Settings screen** with:
-  - Language preference selection
-  - Download preferences for offline content
-  - Data usage consent toggle
-  - App version and about information
+**No authentication required** - Public education tool focused on accessibility.
+- Include **Settings screen** with:
+  - Language preference
+  - Offline content downloads
+  - Data usage consent
+  - App version & about
 
 ### Navigation
 **Tab Navigation** (4 tabs):
-1. **Home** - AI chatbot interface with prominent chat input
-2. **Resources** - Curated vaccine information library
-3. **Saved** - Bookmarked resources and chat history
-4. **Settings** - Language, offline content, privacy controls
+1. **Home** - AI chatbot with Meta AI-style interface
+2. **Resources** - Curated vaccine library
+3. **Saved** - Bookmarks and chat history
+4. **Settings** - Language, privacy, offline content
 
-**Floating Action Button**: "Ask Question" FAB available on Resources and Saved tabs to quickly return to chat.
+**Floating Action Button**: Maroon "Ask Question" FAB on Resources and Saved tabs (bottom-right, 16px from edges).
 
 ### Screen Specifications
 
-#### 1. Language Selection (Initial Launch Only)
-- **Purpose**: One-time language selection on first app open
+#### 1. Language Selection (Initial Launch)
+- **Purpose**: One-time language selection on first open
 - **Layout**:
-  - Full-screen modal with app logo at top (lotus in maroon)
-  - Scrollable list of languages with native script labels
-  - Large, accessible touch targets (min 56px height)
-  - Selected language highlighted with maroon accent
-  - "Continue" button pinned to bottom
-- **Header**: None (full-screen modal)
-- **Safe Area**: Top inset: insets.top + Spacing.xl, Bottom: insets.bottom + Spacing.xl
+  - Full-screen modal, white background
+  - App logo (lotus) centered at top
+  - Large heading: "Choose Your Language"
+  - Scrollable card list of languages (native script labels)
+  - Each language card: white background, 1px gray border, 12px radius, 56px min height
+  - Selected state: maroon border (2px), maroon checkmark icon
+  - "Continue" button pinned to bottom (maroon, full-width, 56px height)
+- **Safe Area**: Top: insets.top + Spacing.xxl, Bottom: insets.bottom + Spacing.xl
 
 #### 2. Home Screen (Chat Interface)
-- **Purpose**: Primary vaccine question answering via AI chatbot
+- **Purpose**: Primary vaccine Q&A via AI chatbot
 - **Layout**:
-  - **Header**: Transparent, shows app logo (lotus) centered, language switcher icon (globe) on right
+  - **Header**: Transparent, white text/icons
+    - App logo (lotus, 28px) centered
+    - Language switcher (globe icon) top-right
   - **Main Content**: 
-    - Scrollable message list (inverted ScrollView)
-    - "How to use" tip card at bottom (dismissible after first use)
-    - Quick-start prompt chips above input for first-time users:
-      - "What vaccines do babies need?"
-      - "Is MMR vaccine safe?"
-      - "Where can I get vaccinated?"
-  - **Chat Input**: Fixed at bottom with beige background
-    - Text input with placeholder in selected language
-    - "Listen" icon to enable voice input (future)
-    - Send button (maroon arrow icon)
-  - **Message Bubbles**:
-    - User messages: Right-aligned, maroon background, white text
-    - Bot messages: Left-aligned, beige background, black text
-    - Include confidence badge (High/Medium/Low) for bot responses
-    - "Listen" button (speaker icon) on bot messages
-    - "Cite sources" link in small text below bot messages
-- **Safe Area**: Top: headerHeight + Spacing.xl, Bottom: tabBarHeight + 80 (input height) + Spacing.xl
+    - White background with subtle gradient (white to beige)
+    - Inverted ScrollView for messages
+    - **Welcome State** (no messages yet):
+      - Large welcome heading: "How can I help you today?"
+      - 3 gradient cards with vaccine topics (maroon to lighter maroon gradients):
+        - "Baby Vaccines" with icon
+        - "Vaccine Safety" with icon  
+        - "Vaccination Centers" with icon
+      - 4-6 suggestion chips below cards: "What vaccines do babies need?", "Is MMR safe?", etc.
+    - **Active Chat**:
+      - User messages: Maroon background, white text, right-aligned, rounded (left corners sharp)
+      - Bot messages: White cards with subtle shadow, black text, left-aligned, rounded (right corners sharp)
+      - Bot messages include:
+        - Confidence badge (top-right: High/Medium/Low with colored dot)
+        - "Listen" button (speaker icon, beige background)
+        - "Sources" link (underlined, small gray text)
+  - **Chat Input**: Fixed at bottom
+    - White card with shadow, beige border (1px)
+    - Text input placeholder in gray
+    - Maroon send button (arrow icon, circular, 44px)
+- **Safe Area**: Top: headerHeight + Spacing.xl, Bottom: tabBarHeight + 90px + Spacing.xl
 
 #### 3. Resources Screen
-- **Purpose**: Browse curated vaccine resources by category
+- **Purpose**: Browse curated vaccine resources
 - **Layout**:
-  - **Header**: Default navigation header with search bar, "Resources" title
-  - **Main Content**: Scrollable list with category sections
-    - Section headers: Bold, maroon text
-    - Resource cards with:
-      - Source badge (MOH/WHO/UNICEF) with icon
-      - Resource title (bold, black)
-      - Plain-language summary (2-3 lines, gray text)
-      - Publish date (small, gray)
-      - External link icon + bookmark icon
-  - Floating "Ask Question" FAB (maroon, bottom-right)
-- **Safe Area**: Top: Spacing.xl, Bottom: tabBarHeight + Spacing.xl + 60 (FAB height)
+  - **Header**: White background, search bar integrated
+    - "Resources" title (bold, 28pt)
+    - Search input with light gray background, rounded
+  - **Main Content**: White background, scrollable
+    - Section headers: Maroon text, 22pt semibold, Spacing.xl top margin
+    - Resource cards (white, subtle shadow, 12px radius):
+      - Source badge (WHO/MOH with colored dot, top-right)
+      - Title (18pt bold)
+      - Summary (16pt regular, gray, 2-3 lines)
+      - Publish date + bookmark icon (bottom row)
+      - Card spacing: Spacing.lg between cards
+  - FAB: Maroon circle with white "+" icon
+    - Shadow: width: 0, height: 4, opacity: 0.15, radius: 8
+- **Safe Area**: Top: Spacing.xl, Bottom: tabBarHeight + Spacing.xl + 72px
 
 #### 4. Saved Screen
-- **Purpose**: Access bookmarked resources and chat history
+- **Purpose**: Bookmarks and chat history
 - **Layout**:
-  - **Header**: Default with tabs for "Bookmarks" | "Chat History"
-  - **Main Content**: 
-    - Scrollable list of saved items
-    - Swipe-to-delete gesture with confirmation
-    - Empty state illustration with "No saved items yet" message
-  - Floating "Ask Question" FAB
+  - **Header**: White background with segmented control
+    - "Bookmarks" | "Chat History" tabs (maroon active state)
+  - **Main Content**: White background
+    - Card-based list (same style as Resources)
+    - Swipe-to-delete with maroon delete button
+    - Empty state: Large icon, "No saved items yet" text (gray)
+  - FAB: Same as Resources
 - **Safe Area**: Same as Resources
 
 #### 5. Settings Screen
-- **Purpose**: Configure language, download offline content, manage privacy
+- **Purpose**: Configure app preferences
 - **Layout**:
-  - **Header**: Default with "Settings" title, back button
-  - **Main Content**: Scrollable form with grouped sections
-    - **Language**: Picker with current selection, chevron right
-    - **Offline Content**: 
-      - Download toggle for each language
-      - Storage usage indicator
-    - **Privacy**: 
-      - Data collection consent toggle
-      - View Privacy Policy button
-      - View Terms of Service button
-    - **About**: App version, credits, licenses
-  - Submit/Cancel: None (changes apply immediately)
+  - **Header**: White background, "Settings" title, back button
+  - **Main Content**: White background, scrollable form
+    - Grouped sections with white cards:
+      - **Language**: Current selection, chevron right
+      - **Offline Content**: Toggle switches per language, storage indicator
+      - **Privacy**: Consent toggle, policy links
+      - **About**: Version, credits
+    - Card spacing: Spacing.lg between groups
 - **Safe Area**: Top: Spacing.xl, Bottom: tabBarHeight + Spacing.xl
 
 #### 6. Source Citation Modal
-- **Purpose**: Display full source references for chatbot answers
+- **Purpose**: Display chatbot source references
 - **Layout**:
-  - Native modal (slides up from bottom)
-  - White background, rounded top corners
-  - Close button (X) in top-right
-  - Scrollable list of sources with:
-    - Source name (bold)
-    - Full citation
-    - Link to original (external)
-    - Date accessed
+  - Native bottom sheet modal
+  - White background, rounded top (24px radius)
+  - "Sources" title, close button (X) top-right
+  - Scrollable list of source cards
+  - Each source: Title (bold), citation, external link icon
 - **Safe Area**: Top: Spacing.lg, Bottom: insets.bottom + Spacing.lg
 
 ## Design System
 
 ### Color Palette
-- **Primary (Maroon)**: `#800020` - CTA buttons, active states, user message bubbles, brand elements
-- **Beige**: `#F5F5DC` - Backgrounds, bot message bubbles, input fields, secondary surfaces
-- **Black**: `#000000` - Primary text, strong accents
-- **Gray Scale**:
-  - Dark Gray `#4A4A4A` - Secondary text
-  - Medium Gray `#9E9E9E` - Tertiary text, metadata
-  - Light Gray `#E0E0E0` - Dividers, disabled states
-- **System Colors**:
-  - Success Green `#4CAF50` - High confidence badge
-  - Warning Orange `#FF9800` - Medium confidence badge
-  - Error Red `#F44336` - Low confidence badge, misinformation warnings
+- **Primary Maroon**: `#800020` - CTAs, active states, accents
+- **Beige**: `#F5F5DC` - Secondary backgrounds, subtle accents
+- **White**: `#FFFFFF` - Primary backgrounds, surfaces
+- **Grays**:
+  - Text: `#1A1A1A` (primary), `#6B6B6B` (secondary), `#9E9E9E` (tertiary)
+  - Borders: `#E5E5E5` (dividers), `#F5F5F5` (subtle backgrounds)
+- **System**:
+  - Success: `#10B981` (high confidence)
+  - Warning: `#F59E0B` (medium confidence)
+  - Error: `#EF4444` (low confidence)
 
 ### Typography
-- **Primary Font**: System default (SF Pro for iOS, Roboto for Android)
-- **Hierarchy**:
-  - Heading 1: 28pt, Bold - Screen titles
-  - Heading 2: 22pt, Semibold - Section headers
-  - Heading 3: 18pt, Semibold - Card titles
-  - Body: 16pt, Regular - Main content
-  - Caption: 14pt, Regular - Metadata, timestamps
-  - Small: 12pt, Regular - Source citations, disclaimers
-- **Line Height**: 1.5x for body text, 1.3x for headings
-- **Accessibility**: Support Dynamic Type (iOS), scale fonts with system settings
+- **Font**: SF Pro (iOS) / Roboto (Android)
+- **Scale**:
+  - H1: 28pt Bold - Screen titles
+  - H2: 22pt Semibold - Section headers
+  - H3: 18pt Semibold - Card titles
+  - Body: 16pt Regular - Main content
+  - Caption: 14pt Regular - Metadata
+  - Small: 12pt Regular - Disclaimers
+- **Line Height**: 1.5x for body, 1.3x for headings
+- **Letter Spacing**: -0.5px for headings, 0px for body
 
-### Spacing & Layout
-- **Spacing Scale**:
-  - xs: 4px
-  - sm: 8px
-  - md: 12px
-  - lg: 16px
-  - xl: 24px
-  - xxl: 32px
-- **Card Padding**: lg (16px) internal padding
-- **List Item Height**: Minimum 56px for touch targets
-- **Corner Radius**: 12px for cards, 24px for input fields and buttons, 8px for badges
+### Spacing & Cards
+- **Spacing Scale**: xs:4, sm:8, md:12, lg:16, xl:24, xxl:32
+- **Card Design**:
+  - Background: White
+  - Border: 1px solid #E5E5E5 (or no border with shadow)
+  - Shadow: {width:0, height:2, opacity:0.08, radius:8}
+  - Radius: 12px standard, 24px for input fields
+  - Padding: lg (16px) internal
+- **Touch Targets**: Minimum 44x44pt (iOS) / 48x48dp (Android)
 
 ### Icons & Assets
-- **Icon Library**: Feather Icons from @expo/vector-icons
-- **Logo**: Stylized lotus SVG
-  - Primary: Maroon lotus with beige background (use in header)
-  - Monochrome: Black lotus (use in small contexts)
-  - Size: 32px in header, 48px in language selection
-- **No custom illustrations** - Use system icons and text-based UI
-- **Confidence Badges**: Text-only badges with color coding
-  - High: Green background, white text
-  - Medium: Orange background, white text
-  - Low: Red background, white text
+- **Icons**: Feather Icons (@expo/vector-icons)
+- **Logo**: Maroon lotus SVG (32px header, 48px language selection)
+- **Confidence Badges**: Colored dot + text
+  - High: Green dot, gray text
+  - Medium: Orange dot, gray text
+  - Low: Red dot, gray text
+- **No custom illustrations** - System icons only
 
 ### Interaction Design
-- **Touchable Feedback**: All buttons and cards have 0.7 opacity when pressed
-- **Floating Action Button Shadow**:
-  - shadowOffset: {width: 0, height: 4}
-  - shadowOpacity: 0.15
-  - shadowRadius: 8
-  - elevation: 8 (Android)
-- **Loading States**: Skeleton screens for resource lists, typing indicator (animated dots) for chatbot
-- **Haptic Feedback**: Light impact on button press, medium on send message, notification on received message
+- **Touchable Feedback**: 0.7 opacity on press (cards, buttons, chips)
+- **FAB Shadow**: {width:0, height:4, opacity:0.15, radius:8}
+- **Loading**: Skeleton screens (gray shimmer) for lists, typing dots (3 animated) for chat
+- **Haptics**: Light on button press, medium on message send
 - **Animations**:
-  - Screen transitions: 300ms slide
+  - Screen transitions: 300ms ease-in-out
   - Modal presentation: 400ms spring
-  - Message appearance: 200ms fade + slide up
+  - Message appear: 200ms fade + slide up
+  - Card hover: 150ms scale (1.0 → 0.98)
 
 ### Accessibility
-- **VoiceOver/TalkBack**: All interactive elements have accessibility labels in selected language
-- **Color Contrast**: Minimum 4.5:1 for body text, 3:1 for large text
-- **Touch Targets**: Minimum 44x44pt (iOS) / 48x48dp (Android)
-- **Text-to-Speech Integration**:
-  - "Listen" button on every bot message and resource summary
-  - Automatic pronunciation of vaccine names using phonetic annotations
-  - Pause/resume/speed controls in accessible modal
-- **Reduce Motion**: Respect system preference, disable animations if enabled
-- **Screen Reader Announcements**: Live regions for new chat messages
+- **Contrast**: 4.5:1 minimum for body text, 3:1 for large text
+- **VoiceOver/TalkBack**: All interactive elements labeled in selected language
+- **Text-to-Speech**: "Listen" button on bot messages and resources
+- **Reduce Motion**: Respect system preference, disable animations
+- **Dynamic Type**: Support system font scaling
 
-### Offline & Performance
-- **Cached Content Indicators**: Small cloud-with-checkmark icon on downloaded resources
-- **Offline Banner**: Persistent yellow banner at top when offline, "You're offline - showing cached content"
-- **Low Bandwidth Mode**: Setting to disable auto-download of audio files
-- **Progressive Loading**: Show text immediately, load TTS audio in background with loading spinner on "Listen" button
-
-### Safety & Moderation
-- **Misinformation Warning**: Red alert card with exclamation icon for blocked queries
-  - "We can't answer this question safely"
-  - "Please contact: [local health facility info]"
-  - Links to WHO/MOH official guidance
-- **Source Attribution**: Every bot message must display "Sources: WHO, Kenya MOH" with tap-to-expand
-- **Report Issue**: Small "Report" link on bot messages for user feedback
+### Offline & Safety
+- **Offline Indicator**: Yellow banner at top ("Offline mode - cached content")
+- **Downloaded Content**: Cloud checkmark icon on cached resources
+- **Misinformation Warning**: Red alert card with exclamation icon, contact info for health facility
+- **Source Attribution**: All bot messages show "Sources: WHO, Kenya MOH" with tap-to-expand
