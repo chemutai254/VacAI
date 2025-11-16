@@ -64,6 +64,10 @@ export async function sendChatMessage(
   };
 }
 
+export const chatbotService = {
+  sendMessage: sendChatMessage,
+};
+
 export function detectUnsafeQuery(message: string): boolean {
   const unsafePatterns = [
     /how to make/i,

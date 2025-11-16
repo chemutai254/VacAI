@@ -7,10 +7,12 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
 import MainTabNavigator from "@/navigation/MainTabNavigator";
+import LandingScreen from "@/screens/LandingScreen";
 import LanguageSelectionScreen from "@/screens/LanguageSelectionScreen";
 import PrivacyConsentScreen from "@/screens/PrivacyConsentScreen";
 import AuthScreen from "@/screens/AuthScreen";
 import OfflineDownloadModal from "@/components/OfflineDownloadModal";
+import { VaccinationStatsModal } from "@/components/VaccinationStatsModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
@@ -21,10 +23,13 @@ import { useAppStateCleanup } from "@/hooks/useAppStateCleanup";
 function AppContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLanguageSelected } = useLanguage();
+  const [showLanding, setShowLanding] = useState(false);
   const [showLanguageSelection, setShowLanguageSelection] = useState(!isLanguageSelected);
   const [showPrivacyConsent, setShowPrivacyConsent] = useState(false);
   const [showOfflineDownload, setShowOfflineDownload] = useState(false);
+  const [showVaccinationStats, setShowVaccinationStats] = useState(false);
   const [isCheckingConsent, setIsCheckingConsent] = useState(true);
+  const [isCheckingLanding, setIsCheckingLanding] = useState(true);
 
   useAppStateCleanup();
 
@@ -33,14 +38,29 @@ function AppContent() {
   }, [isLanguageSelected]);
 
   useEffect(() => {
+    checkLandingStatus();
     checkPrivacyConsent();
   }, []);
 
   useEffect(() => {
     if (isAuthenticated && !showPrivacyConsent && !showLanguageSelection) {
+      checkVaccinationStats();
       checkOfflineDownload();
     }
   }, [isAuthenticated, showPrivacyConsent, showLanguageSelection]);
+
+  const checkLandingStatus = async () => {
+    const hasSeenLanding = await storage.getHasSeenLanding();
+    setShowLanding(!hasSeenLanding);
+    setIsCheckingLanding(false);
+  };
+
+  const checkVaccinationStats = async () => {
+    const hasSeenStats = await storage.getHasSeenVaccinationStats();
+    if (!hasSeenStats) {
+      setShowVaccinationStats(true);
+    }
+  };
 
   const checkPrivacyConsent = async () => {
     const consentValue = await storage.getDataConsent();
@@ -67,44 +87,52 @@ function AppContent() {
     setShowOfflineDownload(false);
   };
 
-  if (authLoading || isCheckingConsent) {
-    return (
-      <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" />
-      </ThemedView>
-    );
-  }
-
-  if (showLanguageSelection) {
-    return (
-      <LanguageSelectionScreen
-        onComplete={() => setShowLanguageSelection(false)}
-      />
-    );
-  }
-
-  if (showPrivacyConsent) {
-    return (
-      <PrivacyConsentScreen
-        onComplete={() => setShowPrivacyConsent(false)}
-      />
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <AuthScreen />;
-  }
+  const isLoading = authLoading || isCheckingConsent || isCheckingLanding;
 
   return (
     <>
-      <NavigationContainer>
-        <MainTabNavigator />
-      </NavigationContainer>
-      <OfflineDownloadModal
-        visible={showOfflineDownload}
-        onDownload={handleDownloadOffline}
-        onSkip={handleSkipOffline}
-      />
+      {isLoading ? (
+        <ThemedView style={styles.loadingContainer}>
+          <ActivityIndicator size="large" />
+        </ThemedView>
+      ) : showLanding ? (
+        <LandingScreen
+          onGetStarted={async () => {
+            await storage.setHasSeenLanding(true);
+            setShowLanding(false);
+          }}
+        />
+      ) : showLanguageSelection ? (
+        <LanguageSelectionScreen
+          onComplete={() => setShowLanguageSelection(false)}
+        />
+      ) : showPrivacyConsent ? (
+        <PrivacyConsentScreen
+          onComplete={() => setShowPrivacyConsent(false)}
+        />
+      ) : !isAuthenticated ? (
+        <AuthScreen />
+      ) : (
+        <NavigationContainer>
+          <MainTabNavigator />
+        </NavigationContainer>
+      )}
+      {isAuthenticated && !isLoading && !showLanding && !showLanguageSelection && !showPrivacyConsent && (
+        <>
+          <OfflineDownloadModal
+            visible={showOfflineDownload}
+            onDownload={handleDownloadOffline}
+            onSkip={handleSkipOffline}
+          />
+          <VaccinationStatsModal
+            visible={showVaccinationStats}
+            onClose={async () => {
+              await storage.setHasSeenVaccinationStats(true);
+              setShowVaccinationStats(false);
+            }}
+          />
+        </>
+      )}
     </>
   );
 }

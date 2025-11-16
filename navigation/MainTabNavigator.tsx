@@ -4,15 +4,15 @@ import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Platform, StyleSheet } from "react-native";
 import ChatStackNavigator from "@/navigation/ChatStackNavigator";
+import CommunitiesStackNavigator from "@/navigation/CommunitiesStackNavigator";
 import ResourcesStackNavigator from "@/navigation/ResourcesStackNavigator";
-import SavedStackNavigator from "@/navigation/SavedStackNavigator";
 import SettingsStackNavigator from "@/navigation/SettingsStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 
 export type MainTabParamList = {
   ChatTab: undefined;
+  CommunitiesTab: undefined;
   ResourcesTab: undefined;
-  SavedTab: undefined;
   SettingsTab: undefined;
 };
 
@@ -51,9 +51,19 @@ export default function MainTabNavigator() {
         name="ChatTab"
         component={ChatStackNavigator}
         options={{
-          title: "Home",
+          title: "Chats",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="home" size={size} color={color} />
+            <Feather name="message-circle" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="CommunitiesTab"
+        component={CommunitiesStackNavigator}
+        options={{
+          title: "Communities",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="users" size={size} color={color} />
           ),
         }}
       />
@@ -64,16 +74,6 @@ export default function MainTabNavigator() {
           title: "Resources",
           tabBarIcon: ({ color, size }) => (
             <Feather name="shield" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="SavedTab"
-        component={SavedStackNavigator}
-        options={{
-          title: "Saved",
-          tabBarIcon: ({ color, size }) => (
-            <Feather name="bookmark" size={size} color={color} />
           ),
         }}
       />

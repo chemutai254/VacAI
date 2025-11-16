@@ -1,12 +1,13 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import ChatScreen from "@/screens/ChatScreen";
+import ChatListScreen from "@/screens/ChatListScreen";
+import ChatConversationScreen from "@/screens/ChatConversationScreen";
 import { getCommonScreenOptions } from "@/navigation/screenOptions";
-import HeaderTitle from "@/components/HeaderTitle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export type ChatStackParamList = {
-  Chat: undefined;
+  ChatList: undefined;
+  ChatConversation: { chatId: string };
 };
 
 const Stack = createNativeStackNavigator<ChatStackParamList>();
@@ -15,11 +16,18 @@ export default function ChatStackNavigator() {
   return (
     <Stack.Navigator screenOptions={getCommonScreenOptions}>
       <Stack.Screen
-        name="Chat"
-        component={ChatScreen}
+        name="ChatList"
+        component={ChatListScreen}
         options={{
-          headerTitle: () => <HeaderTitle />,
-          headerTransparent: true,
+          title: "Chats",
+          headerRight: () => <LanguageSwitcher />,
+        }}
+      />
+      <Stack.Screen
+        name="ChatConversation"
+        component={ChatConversationScreen}
+        options={{
+          title: "Vaccine Assistant",
           headerRight: () => <LanguageSwitcher />,
         }}
       />

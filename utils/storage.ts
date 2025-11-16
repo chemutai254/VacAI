@@ -12,6 +12,8 @@ const KEYS = {
   OFFLINE_PROMPT_DISMISSED: "@vaccine_village:offline_prompt_dismissed",
   FEEDBACK: "@vaccine_village:feedback",
   APP_WAS_BACKGROUNDED: "@vaccine_village:app_was_backgrounded",
+  HAS_SEEN_LANDING: "@vaccine_village:has_seen_landing",
+  HAS_SEEN_VACCINATION_STATS: "@vaccine_village:has_seen_vaccination_stats",
 };
 
 export const storage = {
@@ -224,6 +226,42 @@ export const storage = {
       await AsyncStorage.setItem(KEYS.APP_WAS_BACKGROUNDED, String(wasBackgrounded));
     } catch (error) {
       console.error("Error setting app was backgrounded:", error);
+    }
+  },
+
+  async getHasSeenLanding(): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(KEYS.HAS_SEEN_LANDING);
+      return value === "true";
+    } catch (error) {
+      console.error("Error getting has seen landing:", error);
+      return false;
+    }
+  },
+
+  async setHasSeenLanding(hasSeen: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.HAS_SEEN_LANDING, String(hasSeen));
+    } catch (error) {
+      console.error("Error setting has seen landing:", error);
+    }
+  },
+
+  async getHasSeenVaccinationStats(): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(KEYS.HAS_SEEN_VACCINATION_STATS);
+      return value === "true";
+    } catch (error) {
+      console.error("Error getting has seen vaccination stats:", error);
+      return false;
+    }
+  },
+
+  async setHasSeenVaccinationStats(hasSeen: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.HAS_SEEN_VACCINATION_STATS, String(hasSeen));
+    } catch (error) {
+      console.error("Error setting has seen vaccination stats:", error);
     }
   },
 };

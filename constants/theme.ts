@@ -66,10 +66,13 @@ export const Spacing = {
 };
 
 export const BorderRadius = {
+  sm: 8,
   badge: 8,
   card: 12,
+  lg: 16,
   button: 24,
   input: 24,
+  xl: 20,
   full: 9999,
 };
 
