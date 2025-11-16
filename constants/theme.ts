@@ -2,11 +2,13 @@ import { Platform } from "react-native";
 
 const maroon = "#800020";
 const beige = "#F5F5DC";
+const chatBubbleBeige = "#E8DCC8";
 
 export const Colors = {
   light: {
     primary: maroon,
     beige: beige,
+    chatBubbleBeige: chatBubbleBeige,
     text: "#1A1A1A",
     textSecondary: "#4A4A4A",
     buttonText: "#FFFFFF",

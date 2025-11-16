@@ -48,7 +48,7 @@ export default function ChatBubble({
           styles.bubble,
           isUser
             ? { backgroundColor: Colors.light.primary }
-            : { backgroundColor: Colors.light.beige },
+            : { backgroundColor: Colors.light.chatBubbleBeige },
         ]}
       >
         <ThemedText
@@ -61,34 +61,41 @@ export default function ChatBubble({
           <ConfidenceBadge level={confidence} />
         )}
 
-        {!isUser && (
-          <View style={styles.actionsRow}>
+        <View style={styles.actionsRow}>
+          <Pressable
+            onPress={handleListen}
+            style={({ pressed }) => [
+              styles.actionButton,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Feather 
+              name="volume-2" 
+              size={16} 
+              color={isUser ? "#FFFFFF" : Colors.light.primary} 
+            />
+            <ThemedText style={[
+              styles.actionText, 
+              isUser && styles.userActionText
+            ]}>
+              {t("listen")}
+            </ThemedText>
+          </Pressable>
+
+          {!isUser && sources && sources.length > 0 && (
             <Pressable
-              onPress={handleListen}
+              onPress={handleCiteSources}
               style={({ pressed }) => [
                 styles.actionButton,
                 pressed && styles.pressed,
               ]}
             >
-              <Feather name="volume-2" size={16} color={Colors.light.primary} />
-              <ThemedText style={styles.actionText}>{t("listen")}</ThemedText>
+              <ThemedText style={styles.actionText}>
+                {t("citeSources")}
+              </ThemedText>
             </Pressable>
-
-            {sources && sources.length > 0 && (
-              <Pressable
-                onPress={handleCiteSources}
-                style={({ pressed }) => [
-                  styles.actionButton,
-                  pressed && styles.pressed,
-                ]}
-              >
-                <ThemedText style={styles.actionText}>
-                  {t("citeSources")}
-                </ThemedText>
-              </Pressable>
-            )}
-          </View>
-        )}
+          )}
+        </View>
       </View>
     </View>
   );
@@ -129,6 +136,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.light.primary,
     fontWeight: "600",
+  },
+  userActionText: {
+    color: "#FFFFFF",
   },
   pressed: {
     opacity: 0.7,
