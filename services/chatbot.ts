@@ -190,12 +190,13 @@ export async function sendChatMessage(
     responseKey = "location";
   }
 
-  const translatedContent = translateResponse(response.content, language);
+  const response = getLocalizedResponse(responseKey, language);
+  const finalContent = addLanguageFallback(response.content, language);
 
   return {
     id: Date.now().toString(),
     role: "assistant",
-    content: translatedContent,
+    content: finalContent,
     confidence: response.confidence,
     timestamp: Date.now(),
   };
