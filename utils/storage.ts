@@ -8,6 +8,8 @@ const KEYS = {
   CHAT_HISTORY: "@vaccine_village:chat_history",
   DATA_CONSENT: "@vaccine_village:data_consent",
   HOW_TO_USE_DISMISSED: "@vaccine_village:how_to_use_dismissed",
+  OFFLINE_DOWNLOADED: "@vaccine_village:offline_downloaded",
+  OFFLINE_PROMPT_DISMISSED: "@vaccine_village:offline_prompt_dismissed",
 };
 
 export const storage = {
@@ -85,6 +87,14 @@ export const storage = {
     }
   },
 
+  async clearChatHistory(): Promise<void> {
+    try {
+      await AsyncStorage.removeItem(KEYS.CHAT_HISTORY);
+    } catch (error) {
+      console.error("Error clearing chat history:", error);
+    }
+  },
+
   async getDataConsent(): Promise<boolean | null> {
     try {
       const value = await AsyncStorage.getItem(KEYS.DATA_CONSENT);
@@ -140,6 +150,42 @@ export const storage = {
       );
     } catch (error) {
       console.error("Error setting bookmarked messages:", error);
+    }
+  },
+
+  async getOfflineDownloaded(): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(KEYS.OFFLINE_DOWNLOADED);
+      return value === "true";
+    } catch (error) {
+      console.error("Error getting offline downloaded:", error);
+      return false;
+    }
+  },
+
+  async setOfflineDownloaded(downloaded: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.OFFLINE_DOWNLOADED, String(downloaded));
+    } catch (error) {
+      console.error("Error setting offline downloaded:", error);
+    }
+  },
+
+  async getOfflinePromptDismissed(): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(KEYS.OFFLINE_PROMPT_DISMISSED);
+      return value === "true";
+    } catch (error) {
+      console.error("Error getting offline prompt dismissed:", error);
+      return false;
+    }
+  },
+
+  async setOfflinePromptDismissed(dismissed: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.OFFLINE_PROMPT_DISMISSED, String(dismissed));
+    } catch (error) {
+      console.error("Error setting offline prompt dismissed:", error);
     }
   },
 };

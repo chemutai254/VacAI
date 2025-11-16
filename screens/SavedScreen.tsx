@@ -15,6 +15,13 @@ import { storage } from "@/utils/storage";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { ChatMessage } from "@/services/chatbot";
 
+type ConversationPair = {
+  id: string;
+  question: ChatMessage;
+  answer: ChatMessage;
+  timestamp: number;
+};
+
 export default function SavedScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { t } = useLanguage();
@@ -23,6 +30,7 @@ export default function SavedScreen() {
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [bookmarkedMessages, setBookmarkedMessages] = useState<ChatMessage[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [expandedConversations, setExpandedConversations] = useState<Set<string>>(new Set());
 
   useFocusEffect(
     React.useCallback(() => {
@@ -59,7 +67,29 @@ export default function SavedScreen() {
     bookmarkedIds.includes(r.id)
   );
 
-  const userMessages = chatHistory.filter((m) => m.role === "user");
+  const conversationPairs: ConversationPair[] = [];
+  for (let i = 0; i < chatHistory.length - 1; i++) {
+    if (chatHistory[i].role === "user" && chatHistory[i + 1].role === "assistant") {
+      conversationPairs.push({
+        id: chatHistory[i].id,
+        question: chatHistory[i],
+        answer: chatHistory[i + 1],
+        timestamp: chatHistory[i].timestamp,
+      });
+    }
+  }
+
+  const toggleConversation = (id: string) => {
+    setExpandedConversations(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -184,7 +214,7 @@ export default function SavedScreen() {
 
         {selectedTab === "history" && (
           <>
-            {userMessages.length === 0 ? (
+            {conversationPairs.length === 0 ? (
               <View style={styles.emptyState}>
                 <Feather name="message-circle" size={64} color={Colors.light.mediumGray} />
                 <ThemedText style={styles.emptyText}>
@@ -192,16 +222,60 @@ export default function SavedScreen() {
                 </ThemedText>
               </View>
             ) : (
-              userMessages.reverse().map((message) => (
-                <Card key={message.id} style={styles.historyCard}>
-                  <ThemedText style={styles.historyText}>
-                    {message.content}
-                  </ThemedText>
-                  <ThemedText style={styles.historyDate}>
-                    {new Date(message.timestamp).toLocaleDateString()}
-                  </ThemedText>
-                </Card>
-              ))
+              conversationPairs.reverse().map((pair) => {
+                const isExpanded = expandedConversations.has(pair.id);
+                return (
+                  <Pressable
+                    key={pair.id}
+                    onPress={() => toggleConversation(pair.id)}
+                  >
+                    <Card style={styles.historyCard}>
+                      <View style={styles.conversationHeader}>
+                        <View style={styles.questionBadge}>
+                          <ThemedText style={styles.badgeText}>Q</ThemedText>
+                        </View>
+                        <ThemedText 
+                          style={styles.historyText} 
+                          numberOfLines={isExpanded ? undefined : 2}
+                        >
+                          {pair.question.content}
+                        </ThemedText>
+                        <Feather 
+                          name={isExpanded ? "chevron-up" : "chevron-down"} 
+                          size={20} 
+                          color={Colors.light.mediumGray} 
+                        />
+                      </View>
+                      
+                      {isExpanded && (
+                        <View style={styles.answerContainer}>
+                          <View style={styles.answerHeader}>
+                            <View style={styles.answerBadge}>
+                              <ThemedText style={styles.badgeText}>A</ThemedText>
+                            </View>
+                            <ThemedText style={styles.answerLabel}>{t("response")}</ThemedText>
+                          </View>
+                          <ThemedText style={styles.answerText}>
+                            {pair.answer.content}
+                          </ThemedText>
+                          {pair.answer.sources && pair.answer.sources.length > 0 && (
+                            <View style={styles.sourcesContainer}>
+                              <Feather name="book-open" size={14} color={Colors.light.mediumGray} />
+                              <ThemedText style={styles.sourcesText}>
+                                {pair.answer.sources.length} {pair.answer.sources.length === 1 ? t("source").toLowerCase() : t("sourcesTitle").toLowerCase()}
+                              </ThemedText>
+                            </View>
+                          )}
+                        </View>
+                      )}
+                      
+                      <ThemedText style={styles.historyDate}>
+                        {new Date(pair.timestamp).toLocaleDateString()}
+                      </ThemedText>
+                    </Card>
+                  </Pressable>
+                );
+              })
             )}
           </>
         )}
@@ -256,13 +330,63 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     marginBottom: Spacing.md,
   },
+  conversationHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  questionBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.light.primary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  answerBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.light.secondary,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+  },
   historyText: {
     fontSize: 16,
-    marginBottom: Spacing.sm,
+    flex: 1,
   },
   historyDate: {
     fontSize: 12,
     color: Colors.light.mediumGray,
+    marginTop: Spacing.sm,
+  },
+  answerContainer: {
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.lightGray,
+  },
+  answerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  answerLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: Colors.light.mediumGray,
+  },
+  answerText: {
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: Spacing.sm,
   },
   messageCard: {
     padding: Spacing.lg,

@@ -10,18 +10,23 @@ import MainTabNavigator from "@/navigation/MainTabNavigator";
 import LanguageSelectionScreen from "@/screens/LanguageSelectionScreen";
 import PrivacyConsentScreen from "@/screens/PrivacyConsentScreen";
 import AuthScreen from "@/screens/AuthScreen";
+import OfflineDownloadModal from "@/components/OfflineDownloadModal";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemedView } from "@/components/ThemedView";
 import { storage } from "@/utils/storage";
+import { useAppStateCleanup } from "@/hooks/useAppStateCleanup";
 
 function AppContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLanguageSelected } = useLanguage();
   const [showLanguageSelection, setShowLanguageSelection] = useState(!isLanguageSelected);
   const [showPrivacyConsent, setShowPrivacyConsent] = useState(false);
+  const [showOfflineDownload, setShowOfflineDownload] = useState(false);
   const [isCheckingConsent, setIsCheckingConsent] = useState(true);
+
+  useAppStateCleanup();
 
   useEffect(() => {
     setShowLanguageSelection(!isLanguageSelected);
@@ -31,11 +36,35 @@ function AppContent() {
     checkPrivacyConsent();
   }, []);
 
+  useEffect(() => {
+    if (isAuthenticated && !showPrivacyConsent && !showLanguageSelection) {
+      checkOfflineDownload();
+    }
+  }, [isAuthenticated, showPrivacyConsent, showLanguageSelection]);
+
   const checkPrivacyConsent = async () => {
     const consentValue = await storage.getDataConsent();
     const hasSetConsent = consentValue !== null;
     setShowPrivacyConsent(!hasSetConsent);
     setIsCheckingConsent(false);
+  };
+
+  const checkOfflineDownload = async () => {
+    const downloaded = await storage.getOfflineDownloaded();
+    const dismissed = await storage.getOfflinePromptDismissed();
+    if (!downloaded && !dismissed) {
+      setShowOfflineDownload(true);
+    }
+  };
+
+  const handleDownloadOffline = async () => {
+    await storage.setOfflineDownloaded(true);
+    setShowOfflineDownload(false);
+  };
+
+  const handleSkipOffline = async () => {
+    await storage.setOfflinePromptDismissed(true);
+    setShowOfflineDownload(false);
   };
 
   if (authLoading || isCheckingConsent) {
@@ -67,9 +96,16 @@ function AppContent() {
   }
 
   return (
-    <NavigationContainer>
-      <MainTabNavigator />
-    </NavigationContainer>
+    <>
+      <NavigationContainer>
+        <MainTabNavigator />
+      </NavigationContainer>
+      <OfflineDownloadModal
+        visible={showOfflineDownload}
+        onDownload={handleDownloadOffline}
+        onSkip={handleSkipOffline}
+      />
+    </>
   );
 }
 
