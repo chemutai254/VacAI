@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable, Switch } from "react-native";
+import { View, StyleSheet, Pressable, Switch, Alert } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -8,6 +8,7 @@ import { ScreenScrollView } from "@/components/ScreenScrollView";
 import { BorderRadius, Colors, Spacing } from "@/constants/theme";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/hooks/useTheme";
 import { SUPPORTED_LANGUAGES } from "@/constants/languages";
 import { storage } from "@/utils/storage";
@@ -16,6 +17,7 @@ import * as Haptics from "expo-haptics";
 export default function SettingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { t, language, setLanguage } = useLanguage();
+  const { user, logout, updateLocation } = useAuth();
   const { theme } = useTheme();
   const [dataConsent, setDataConsent] = useState(false);
 
@@ -34,6 +36,37 @@ export default function SettingsScreen() {
     await storage.setDataConsent(value);
   };
 
+  const handleLogout = () => {
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Sign Out",
+          style: "destructive",
+          onPress: async () => {
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+            await logout();
+          },
+        },
+      ]
+    );
+  };
+
+  const handleUpdateLocation = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      await updateLocation();
+      Alert.alert("Success", "Location updated successfully");
+    } catch (error) {
+      Alert.alert("Error", "Failed to update location. Please check your location permissions.");
+    }
+  };
+
   const getCurrentLanguageName = () => {
     const lang = SUPPORTED_LANGUAGES.find((l) => l.code === language);
     return lang?.nativeName || "English";
@@ -47,6 +80,38 @@ export default function SettingsScreen() {
           paddingBottom: tabBarHeight + Spacing.xl,
         }}
       >
+        <ThemedText style={styles.sectionTitle}>Profile</ThemedText>
+        <Card style={styles.settingCard}>
+          <View style={styles.profileSection}>
+            <View style={styles.profileIcon}>
+              <Feather name="user" size={32} color={Colors.light.primary} />
+            </View>
+            <View style={styles.profileInfo}>
+              <ThemedText style={styles.profileName}>{user?.name}</ThemedText>
+              <ThemedText style={styles.profileDetail}>{user?.phoneNumber}</ThemedText>
+              {user?.location ? (
+                <ThemedText style={styles.profileDetail}>
+                  Location: {user.location.latitude.toFixed(4)}, {user.location.longitude.toFixed(4)}
+                </ThemedText>
+              ) : null}
+            </View>
+          </View>
+        </Card>
+
+        <Pressable onPress={handleUpdateLocation}>
+          <Card style={styles.settingCard}>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <ThemedText style={styles.settingLabel}>Update Location</ThemedText>
+                <ThemedText style={styles.settingDescription}>
+                  Get personalized health resources for your area
+                </ThemedText>
+              </View>
+              <Feather name="map-pin" size={20} color={Colors.light.primary} />
+            </View>
+          </Card>
+        </Pressable>
+
         <ThemedText style={styles.sectionTitle}>{t("language")}</ThemedText>
         <Card style={styles.settingCard}>
           <View style={styles.settingRow}>
@@ -173,6 +238,22 @@ export default function SettingsScreen() {
           </View>
         </Card>
 
+        <Pressable
+          onPress={handleLogout}
+          style={({ pressed }) => [
+            styles.logoutButton,
+            {
+              backgroundColor: Colors.light.error,
+              opacity: pressed ? 0.8 : 1,
+            },
+          ]}
+        >
+          <Feather name="log-out" size={20} color="#FFFFFF" />
+          <ThemedText style={[styles.logoutText, { color: "#FFFFFF" }]}>
+            Sign Out
+          </ThemedText>
+        </Pressable>
+
         <View style={styles.footer}>
           <ThemedText style={styles.footerText}>
             Made for Kenyan communities
@@ -223,6 +304,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: Colors.light.mediumGray,
     marginTop: Spacing.xs,
+  },
+  profileSection: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  profileIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: BorderRadius.full,
+    backgroundColor: Colors.light.backgroundSecondary,
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: Spacing.lg,
+  },
+  profileInfo: {
+    flex: 1,
+  },
+  profileName: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: Spacing.xs,
+  },
+  profileDetail: {
+    fontSize: 14,
+    color: Colors.light.mediumGray,
+    marginBottom: Spacing.xs,
+  },
+  logoutButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.button,
+    marginTop: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  logoutText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
   footer: {
     paddingVertical: Spacing.xxl,
