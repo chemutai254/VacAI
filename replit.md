@@ -2,7 +2,17 @@
 
 ## Overview
 
-Vaccine Village is a React Native mobile application built with Expo that provides multilingual vaccine education for Kenyan communities. The app serves as an accessible educational tool offering AI-powered chatbot assistance, curated vaccine resources, and offline-capable content in English, Swahili, and 13 indigenous Kenyan languages. It emphasizes privacy, low-bandwidth compatibility, and culturally appropriate health information delivery.
+Vaccine Village is a React Native mobile application built with Expo that provides multilingual vaccine education for Kenyan communities. The app serves as an accessible educational tool offering AI-powered chatbot assistance (mock service), curated vaccine resources, and offline-capable content in English, Swahili, and 13 indigenous Kenyan languages. It emphasizes privacy, low-bandwidth compatibility, and culturally appropriate health information delivery.
+
+### Recent Features (November 16, 2025)
+- **Enhanced History View**: Chat history now displays full conversation pairs (Q&A) with expandable cards
+- **Improved Navigation**: Tapping Chat tab while active scrolls to top and clears input
+- **Smart Cache Management**: Chat history auto-clears after 30 minutes in background
+- **Custom Branding**: Maroon/beige app icons for iOS, Android (adaptive), and web
+- **Offline Mode**: Startup modal offers resource download for offline access
+- **User Feedback**: Star rating (1-5) and feedback form in Settings
+- **Cross-screen Sync**: Bookmarks synchronized across all screens
+- **Multilingual Support**: All new features translated to Swahili (professional translation needed for other 13 languages)
 
 ## User Preferences
 

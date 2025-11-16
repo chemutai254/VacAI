@@ -10,6 +10,8 @@ const KEYS = {
   HOW_TO_USE_DISMISSED: "@vaccine_village:how_to_use_dismissed",
   OFFLINE_DOWNLOADED: "@vaccine_village:offline_downloaded",
   OFFLINE_PROMPT_DISMISSED: "@vaccine_village:offline_prompt_dismissed",
+  FEEDBACK: "@vaccine_village:feedback",
+  APP_WAS_BACKGROUNDED: "@vaccine_village:app_was_backgrounded",
 };
 
 export const storage = {
@@ -186,6 +188,42 @@ export const storage = {
       await AsyncStorage.setItem(KEYS.OFFLINE_PROMPT_DISMISSED, String(dismissed));
     } catch (error) {
       console.error("Error setting offline prompt dismissed:", error);
+    }
+  },
+
+  async getFeedback(): Promise<any[]> {
+    try {
+      const value = await AsyncStorage.getItem(KEYS.FEEDBACK);
+      return value ? JSON.parse(value) : [];
+    } catch (error) {
+      console.error("Error getting feedback:", error);
+      return [];
+    }
+  },
+
+  async setFeedback(feedback: any[]): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.FEEDBACK, JSON.stringify(feedback));
+    } catch (error) {
+      console.error("Error setting feedback:", error);
+    }
+  },
+
+  async getAppWasBackgrounded(): Promise<boolean> {
+    try {
+      const value = await AsyncStorage.getItem(KEYS.APP_WAS_BACKGROUNDED);
+      return value === "true";
+    } catch (error) {
+      console.error("Error getting app was backgrounded:", error);
+      return false;
+    }
+  },
+
+  async setAppWasBackgrounded(wasBackgrounded: boolean): Promise<void> {
+    try {
+      await AsyncStorage.setItem(KEYS.APP_WAS_BACKGROUNDED, String(wasBackgrounded));
+    } catch (error) {
+      console.error("Error setting app was backgrounded:", error);
     }
   },
 };

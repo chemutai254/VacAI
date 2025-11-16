@@ -13,12 +13,18 @@ import { useTheme } from "@/hooks/useTheme";
 import { SUPPORTED_LANGUAGES } from "@/constants/languages";
 import { storage } from "@/utils/storage";
 import * as Haptics from "expo-haptics";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
+
+type SettingsScreenNavigationProp = NativeStackNavigationProp<SettingsStackParamList, "Settings">;
 
 export default function SettingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { t, language, setLanguage } = useLanguage();
   const { user, logout, updateLocation } = useAuth();
   const { theme } = useTheme();
+  const navigation = useNavigation<SettingsScreenNavigationProp>();
   const [dataConsent, setDataConsent] = useState(false);
 
   useEffect(() => {
@@ -225,6 +231,32 @@ export default function SettingsScreen() {
         </Pressable>
 
         <ThemedText style={styles.sectionTitle}>{t("about")}</ThemedText>
+        
+        <Pressable
+          onPress={async () => {
+            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate("Feedback");
+          }}
+        >
+          <Card style={styles.settingCard}>
+            <View style={styles.settingRow}>
+              <View style={styles.settingInfo}>
+                <ThemedText style={styles.settingLabel}>
+                  {t("feedback")}
+                </ThemedText>
+                <ThemedText style={styles.settingDescription}>
+                  {t("shareFeedback")}
+                </ThemedText>
+              </View>
+              <Feather
+                name="chevron-right"
+                size={24}
+                color={Colors.light.mediumGray}
+              />
+            </View>
+          </Card>
+        </Pressable>
+        
         <Card style={styles.settingCard}>
           <View style={styles.settingRow}>
             <View style={styles.settingInfo}>
