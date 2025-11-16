@@ -1,30 +1,46 @@
 import { Platform } from "react-native";
 
-const tintColorLight = "#007AFF";
-const tintColorDark = "#0A84FF";
+const maroon = "#800020";
+const beige = "#F5F5DC";
 
 export const Colors = {
   light: {
-    text: "#11181C",
+    primary: maroon,
+    beige: beige,
+    text: "#000000",
     buttonText: "#FFFFFF",
-    tabIconDefault: "#687076",
-    tabIconSelected: tintColorLight,
-    link: "#007AFF",
-    backgroundRoot: "#FFFFFF", // Elevation 0
-    backgroundDefault: "#F2F2F2", // Elevation 1
-    backgroundSecondary: "#E6E6E6", // Elevation 2
-    backgroundTertiary: "#D9D9D9", // Elevation 3
+    tabIconDefault: "#9E9E9E",
+    tabIconSelected: maroon,
+    link: maroon,
+    backgroundRoot: "#FFFFFF",
+    backgroundDefault: beige,
+    backgroundSecondary: "#E0E0E0",
+    backgroundTertiary: "#F5F5F5",
+    darkGray: "#4A4A4A",
+    mediumGray: "#9E9E9E",
+    lightGray: "#E0E0E0",
+    success: "#4CAF50",
+    warning: "#FF9800",
+    error: "#F44336",
   },
   dark: {
-    text: "#ECEDEE",
+    primary: maroon,
+    beige: beige,
+    text: "#FFFFFF",
     buttonText: "#FFFFFF",
     tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
-    link: "#0A84FF",
-    backgroundRoot: "#1F2123", // Elevation 0
-    backgroundDefault: "#2A2C2E", // Elevation 1
-    backgroundSecondary: "#353739", // Elevation 2
-    backgroundTertiary: "#404244", // Elevation 3
+    tabIconSelected: maroon,
+    link: maroon,
+    backgroundRoot: "#1F2123",
+    backgroundDefault: "#2A2C2E",
+    backgroundSecondary: "#353739",
+    backgroundTertiary: "#404244",
+    darkGray: "#E0E0E0",
+    mediumGray: "#9E9E9E",
+    lightGray: "#4A4A4A",
+    success: "#4CAF50",
+    warning: "#FF9800",
+    error: "#F44336",
   },
 };
 
@@ -33,60 +49,45 @@ export const Spacing = {
   sm: 8,
   md: 12,
   lg: 16,
-  xl: 20,
-  "2xl": 24,
-  "3xl": 32,
-  "4xl": 40,
-  "5xl": 48,
-  inputHeight: 48,
-  buttonHeight: 52,
+  xl: 24,
+  xxl: 32,
+  inputHeight: 56,
+  buttonHeight: 56,
+  fabSize: 56,
+  chatInputHeight: 80,
 };
 
 export const BorderRadius = {
-  xs: 8,
-  sm: 12,
-  md: 18,
-  lg: 24,
-  xl: 30,
-  "2xl": 40,
-  "3xl": 50,
+  badge: 8,
+  card: 12,
+  button: 24,
+  input: 24,
   full: 9999,
 };
 
 export const Typography = {
   h1: {
-    fontSize: 32,
-    lineHeight: 40,
+    fontSize: 28,
     fontWeight: "700" as const,
   },
   h2: {
-    fontSize: 28,
-    lineHeight: 36,
-    fontWeight: "700" as const,
-  },
-  h3: {
-    fontSize: 24,
-    lineHeight: 32,
+    fontSize: 22,
     fontWeight: "600" as const,
   },
-  h4: {
-    fontSize: 20,
-    lineHeight: 28,
+  h3: {
+    fontSize: 18,
     fontWeight: "600" as const,
   },
   body: {
     fontSize: 16,
-    lineHeight: 24,
+    fontWeight: "400" as const,
+  },
+  caption: {
+    fontSize: 14,
     fontWeight: "400" as const,
   },
   small: {
-    fontSize: 14,
-    lineHeight: 20,
-    fontWeight: "400" as const,
-  },
-  link: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: 12,
     fontWeight: "400" as const,
   },
 };

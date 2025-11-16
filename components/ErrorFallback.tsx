@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    padding: Spacing["2xl"],
+    padding: Spacing.xl,
   },
   content: {
     alignItems: "center",
@@ -170,11 +170,11 @@ const styles = StyleSheet.create({
   },
   topButton: {
     position: "absolute",
-    top: Spacing["2xl"] + Spacing.lg,
+    top: Spacing.xl + Spacing.lg,
     right: Spacing.lg,
     width: 44,
     height: 44,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.card,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -182,8 +182,8 @@ const styles = StyleSheet.create({
   },
   button: {
     paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    paddingHorizontal: Spacing["2xl"],
+    borderRadius: BorderRadius.button,
+    paddingHorizontal: Spacing.xl,
     minWidth: 200,
     shadowColor: "#000",
     shadowOffset: {
@@ -207,8 +207,8 @@ const styles = StyleSheet.create({
   modalContainer: {
     width: "100%",
     height: "90%",
-    borderTopLeftRadius: BorderRadius.lg,
-    borderTopRightRadius: BorderRadius.lg,
+    borderTopLeftRadius: BorderRadius.button,
+    borderTopRightRadius: BorderRadius.button,
   },
   modalHeader: {
     flexDirection: "row",
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     width: "100%",
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.card,
     overflow: "hidden",
     padding: Spacing.lg,
   },

@@ -3,13 +3,17 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Platform, StyleSheet } from "react-native";
-import HomeStackNavigator from "@/navigation/HomeStackNavigator";
-import ProfileStackNavigator from "@/navigation/ProfileStackNavigator";
+import ChatStackNavigator from "@/navigation/ChatStackNavigator";
+import ResourcesStackNavigator from "@/navigation/ResourcesStackNavigator";
+import SavedStackNavigator from "@/navigation/SavedStackNavigator";
+import SettingsStackNavigator from "@/navigation/SettingsStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 
 export type MainTabParamList = {
-  HomeTab: undefined;
-  ProfileTab: undefined;
+  ChatTab: undefined;
+  ResourcesTab: undefined;
+  SavedTab: undefined;
+  SettingsTab: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -19,7 +23,7 @@ export default function MainTabNavigator() {
 
   return (
     <Tab.Navigator
-      initialRouteName="HomeTab"
+      initialRouteName="ChatTab"
       screenOptions={{
         tabBarActiveTintColor: theme.tabIconSelected,
         tabBarInactiveTintColor: theme.tabIconDefault,
@@ -44,22 +48,42 @@ export default function MainTabNavigator() {
       }}
     >
       <Tab.Screen
-        name="HomeTab"
-        component={HomeStackNavigator}
+        name="ChatTab"
+        component={ChatStackNavigator}
         options={{
           title: "Home",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="home" size={size} color={color} />
+            <Feather name="message-circle" size={size} color={color} />
           ),
         }}
       />
       <Tab.Screen
-        name="ProfileTab"
-        component={ProfileStackNavigator}
+        name="ResourcesTab"
+        component={ResourcesStackNavigator}
         options={{
-          title: "Profile",
+          title: "Resources",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="user" size={size} color={color} />
+            <Feather name="book-open" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="SavedTab"
+        component={SavedStackNavigator}
+        options={{
+          title: "Saved",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="bookmark" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="SettingsTab"
+        component={SettingsStackNavigator}
+        options={{
+          title: "Settings",
+          tabBarIcon: ({ color, size }) => (
+            <Feather name="settings" size={size} color={color} />
           ),
         }}
       />

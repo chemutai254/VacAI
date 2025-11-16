@@ -4,11 +4,7 @@ import { View, StyleSheet, Image } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing } from "@/constants/theme";
 
-interface HeaderTitleProps {
-  title: string;
-}
-
-export function HeaderTitle({ title }: HeaderTitleProps) {
+export default function HeaderTitle() {
   return (
     <View style={styles.container}>
       <Image
@@ -16,7 +12,7 @@ export function HeaderTitle({ title }: HeaderTitleProps) {
         style={styles.icon}
         resizeMode="contain"
       />
-      <ThemedText style={styles.title}>{title}</ThemedText>
+      <ThemedText style={styles.title}>Vaccine Village</ThemedText>
     </View>
   );
 }
@@ -28,8 +24,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   icon: {
-    width: 28,
-    height: 28,
+    width: 32,
+    height: 32,
     marginRight: Spacing.sm,
   },
   title: {
