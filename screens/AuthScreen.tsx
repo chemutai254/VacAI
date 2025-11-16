@@ -15,18 +15,27 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@/contexts/AuthContext";
 import { Colors, Spacing, BorderRadius } from "@/constants/theme";
+import { validatePassword } from "@/utils/password";
 
 export default function AuthScreen() {
   const insets = useSafeAreaInsets();
-  const { login } = useAuth();
-  const [name, setName] = useState("");
+  const { signup } = useAuth();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
-    if (!name.trim()) {
-      setError("Please enter your name");
+  const handleSignup = async () => {
+    if (!firstName.trim()) {
+      setError("Please enter your first name");
+      return;
+    }
+
+    if (!lastName.trim()) {
+      setError("Please enter your last name");
       return;
     }
 
@@ -41,13 +50,19 @@ export default function AuthScreen() {
       return;
     }
 
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      setError(passwordValidation.error || "Invalid password");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
-      await login(phoneNumber.trim(), name.trim());
+      await signup(firstName.trim(), lastName.trim(), phoneNumber.trim(), password);
     } catch (err) {
-      setError("Failed to sign in. Please try again.");
+      setError("Failed to sign up. Please try again.");
       setIsLoading(false);
     }
   };
@@ -96,11 +111,38 @@ export default function AuthScreen() {
                     backgroundColor: Colors.light.backgroundDefault,
                   },
                 ]}
-                placeholder="Your name"
+                placeholder="First name"
                 placeholderTextColor={Colors.light.mediumGray}
-                value={name}
+                value={firstName}
                 onChangeText={(text) => {
-                  setName(text);
+                  setFirstName(text);
+                  setError("");
+                }}
+                autoCapitalize="words"
+                editable={!isLoading}
+              />
+            </View>
+
+            <View style={styles.inputContainer}>
+              <Feather
+                name="user"
+                size={20}
+                color={Colors.light.mediumGray}
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    color: Colors.light.text,
+                    backgroundColor: Colors.light.backgroundDefault,
+                  },
+                ]}
+                placeholder="Last name"
+                placeholderTextColor={Colors.light.mediumGray}
+                value={lastName}
+                onChangeText={(text) => {
+                  setLastName(text);
                   setError("");
                 }}
                 autoCapitalize="words"
@@ -135,6 +177,44 @@ export default function AuthScreen() {
               />
             </View>
 
+            <View style={styles.inputContainer}>
+              <Feather
+                name="lock"
+                size={20}
+                color={Colors.light.mediumGray}
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    color: Colors.light.text,
+                    backgroundColor: Colors.light.backgroundDefault,
+                    paddingRight: Spacing.xl + Spacing.lg,
+                  },
+                ]}
+                placeholder="Password (minimum 6 characters)"
+                placeholderTextColor={Colors.light.mediumGray}
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  setError("");
+                }}
+                secureTextEntry={!showPassword}
+                editable={!isLoading}
+              />
+              <Pressable
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Feather
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={Colors.light.mediumGray}
+                />
+              </Pressable>
+            </View>
+
             {error ? (
               <View style={styles.errorContainer}>
                 <Feather name="alert-circle" size={16} color={Colors.light.error} />
@@ -152,7 +232,7 @@ export default function AuthScreen() {
                   opacity: pressed || isLoading ? 0.8 : 1,
                 },
               ]}
-              onPress={handleLogin}
+              onPress={handleSignup}
               disabled={isLoading}
             >
               {isLoading ? (
@@ -261,5 +341,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
     opacity: 0.8,
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: Spacing.lg,
+    top: Spacing.lg + 2,
+    zIndex: 1,
   },
 });

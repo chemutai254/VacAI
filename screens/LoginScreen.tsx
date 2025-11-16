@@ -20,8 +20,10 @@ import { Colors, Spacing, BorderRadius } from "@/constants/theme";
 
 export default function LoginScreen() {
   const insets = useSafeAreaInsets();
-  const { loginWithPhone } = useAuth();
+  const { login } = useAuth();
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -37,13 +39,18 @@ export default function LoginScreen() {
       return;
     }
 
+    if (!password) {
+      setError("Please enter your password");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
-      const success = await loginWithPhone(phoneNumber.trim());
+      const success = await login(phoneNumber.trim(), password);
       if (!success) {
-        setError("Phone number not found. Please sign up first.");
+        setError("Invalid phone number or password");
       }
     } catch (err) {
       setError("Failed to log in. Please try again.");
@@ -119,6 +126,44 @@ export default function LoginScreen() {
               />
             </View>
 
+            <View style={styles.inputContainer}>
+              <Feather
+                name="lock"
+                size={20}
+                color={Colors.light.mediumGray}
+                style={styles.inputIcon}
+              />
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    color: Colors.light.text,
+                    backgroundColor: Colors.light.backgroundDefault,
+                    paddingRight: Spacing.xl + Spacing.lg,
+                  },
+                ]}
+                placeholder="Password"
+                placeholderTextColor={Colors.light.mediumGray}
+                value={password}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  setError("");
+                }}
+                secureTextEntry={!showPassword}
+                editable={!isLoading}
+              />
+              <Pressable
+                style={styles.eyeIcon}
+                onPress={() => setShowPassword(!showPassword)}
+              >
+                <Feather
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={20}
+                  color={Colors.light.mediumGray}
+                />
+              </Pressable>
+            </View>
+
             {error ? (
               <View style={styles.errorContainer}>
                 <Feather name="alert-circle" size={16} color={Colors.light.error} />
@@ -154,7 +199,7 @@ export default function LoginScreen() {
             <View style={styles.infoContainer}>
               <Feather name="info" size={16} color={Colors.light.info} />
               <ThemedText style={styles.infoText}>
-                Enter the phone number you used to sign up
+                Enter the phone number and password you used to sign up
               </ThemedText>
             </View>
 
@@ -296,5 +341,11 @@ const styles = StyleSheet.create({
   },
   secondaryButtonText: {
     fontWeight: "600",
+  },
+  eyeIcon: {
+    position: "absolute",
+    right: Spacing.lg,
+    top: Spacing.lg + 2,
+    zIndex: 1,
   },
 });

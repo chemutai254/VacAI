@@ -93,7 +93,9 @@ export default function SettingsScreen() {
               <Feather name="user" size={32} color={Colors.light.primary} />
             </View>
             <View style={styles.profileInfo}>
-              <ThemedText style={styles.profileName}>{user?.name}</ThemedText>
+              <ThemedText style={styles.profileName}>
+                {user ? `${user.firstName} ${user.lastName}` : ""}
+              </ThemedText>
               <ThemedText style={styles.profileDetail}>{user?.phoneNumber}</ThemedText>
               {user?.location ? (
                 <ThemedText style={styles.profileDetail}>

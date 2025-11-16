@@ -1,11 +1,15 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
+import { hashPassword, verifyPassword } from "@/utils/password";
+import { normalizeKenyanPhone } from "@/utils/phoneNormalization";
 
 interface User {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
   phoneNumber: string;
+  passwordHash: string;
   location?: {
     latitude: number;
     longitude: number;
@@ -20,8 +24,8 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   hasExistingProfile: boolean;
-  login: (phoneNumber: string, name: string) => Promise<void>;
-  loginWithPhone: (phoneNumber: string) => Promise<boolean>;
+  signup: (firstName: string, lastName: string, phoneNumber: string, password: string) => Promise<void>;
+  login: (phoneNumber: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updateLocation: () => Promise<void>;
 }
@@ -44,6 +48,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const profileJson = await AsyncStorage.getItem(USER_PROFILE_STORAGE_KEY);
       if (profileJson) {
         setHasExistingProfile(true);
+        
+        let profile: User = JSON.parse(profileJson);
+        const normalizedPhone = normalizeKenyanPhone(profile.phoneNumber);
+        
+        if (normalizedPhone !== profile.phoneNumber) {
+          profile = { ...profile, phoneNumber: normalizedPhone };
+          await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+        }
+        
+        setUser(profile);
       }
     } catch (error) {
       console.error("Failed to load user profile:", error);
@@ -86,12 +100,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const login = async (phoneNumber: string, name: string) => {
+  const signup = async (firstName: string, lastName: string, phoneNumber: string, password: string) => {
     try {
+      const passwordHash = await hashPassword(password);
+      const normalizedPhone = normalizeKenyanPhone(phoneNumber);
+      
       const newUser: User = {
         id: `user_${Date.now()}`,
-        name,
-        phoneNumber,
+        firstName,
+        lastName,
+        phoneNumber: normalizedPhone,
+        passwordHash,
         createdAt: new Date().toISOString(),
       };
 
@@ -109,7 +128,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           };
         }
       } catch (locationError) {
-        console.log("Location capture failed during login, continuing without location:", locationError);
+        console.log("Location capture failed during signup, continuing without location:", locationError);
       }
 
       await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(newUser));
@@ -121,7 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithPhone = async (phoneNumber: string): Promise<boolean> => {
+  const login = async (phoneNumber: string, password: string): Promise<boolean> => {
     try {
       const profileJson = await AsyncStorage.getItem(USER_PROFILE_STORAGE_KEY);
       if (!profileJson) {
@@ -129,22 +148,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       const profile: User = JSON.parse(profileJson);
-      
-      const normalizedInputPhone = phoneNumber.startsWith('+254') 
-        ? phoneNumber 
-        : phoneNumber.replace(/^0/, '+254');
-      const normalizedProfilePhone = profile.phoneNumber.startsWith('+254')
-        ? profile.phoneNumber
-        : profile.phoneNumber.replace(/^0/, '+254');
+      const normalizedInputPhone = normalizeKenyanPhone(phoneNumber);
 
-      if (normalizedInputPhone !== normalizedProfilePhone) {
+      if (normalizedInputPhone !== profile.phoneNumber) {
+        return false;
+      }
+
+      const passwordValid = await verifyPassword(password, profile.passwordHash);
+      if (!passwordValid) {
         return false;
       }
 
       setUser(profile);
       return true;
     } catch (error) {
-      console.error("Failed to login with phone:", error);
+      console.error("Failed to login:", error);
       throw error;
     }
   };
@@ -165,8 +183,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: user !== null,
         hasExistingProfile,
+        signup,
         login,
-        loginWithPhone,
         logout,
         updateLocation,
       }}

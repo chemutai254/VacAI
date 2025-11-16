@@ -155,39 +155,39 @@ export async function sendChatMessage(
   } else if (lowerMessage.includes("hpv") || lowerMessage.includes("cervical") || lowerMessage.includes("cancer")) {
     responseKey = "hpv";
   } else if (lowerMessage.includes("flu") || lowerMessage.includes("influenza") || lowerMessage.includes("homa")) {
-    responseKey = "flu";
+    responseKey = "flu;
   } else if (lowerMessage.includes("tetanus") || lowerMessage.includes("lockjaw") || lowerMessage.includes("pepopunda")) {
-    responseKey = "tetanus";
+    responseKey = "tetanus;
   } else if (lowerMessage.includes("polio") || lowerMessage.includes("paralysis")) {
-    responseKey = "polio";
+    responseKey = "polio;
   } else if (lowerMessage.includes("pneumo") || lowerMessage.includes("pneumonia")) {
-    responseKey = "pneumococcal";
+    responseKey = "pneumococcal;
   } else if (lowerMessage.includes("rota") || lowerMessage.includes("diarr") || lowerMessage.includes("kuharisha")) {
-    responseKey = "rotavirus";
+    responseKey = "rotavirus;
   } else if (lowerMessage.includes("hepatitis") || lowerMessage.includes("liver") || lowerMessage.includes("ini")) {
-    responseKey = "hepatitisB";
+    responseKey = "hepatitisB;
   } else if (lowerMessage.includes("bcg") || lowerMessage.includes("tb") || lowerMessage.includes("tuberc") || lowerMessage.includes("kifua")) {
-    responseKey = "tuberculosis";
+    responseKey = "tuberculosis;
   } else if (lowerMessage.includes("pregnan") || lowerMessage.includes("mimba") || lowerMessage.includes("expecting") || lowerMessage.includes("mjamzito")) {
-    responseKey = "pregnant";
+    responseKey = "pregnant;
   } else if (lowerMessage.includes("side effect") || lowerMessage.includes("reaction") || lowerMessage.includes("athiri")) {
-    responseKey = "sideEffects";
+    responseKey = "sideEffects;
   } else if (lowerMessage.includes("effective") || lowerMessage.includes("work") || lowerMessage.includes("herd") || lowerMessage.includes("immunity")) {
-    responseKey = "effectiveness";
+    responseKey = "effectiveness;
   } else if (lowerMessage.includes("allerg") || lowerMessage.includes("egg") || lowerMessage.includes("latex")) {
-    responseKey = "allergies";
+    responseKey = "allergies;
   } else if (lowerMessage.includes("travel") || lowerMessage.includes("yellow fever") || lowerMessage.includes("trip") || lowerMessage.includes("safari")) {
-    responseKey = "travel";
+    responseKey = "travel;
   } else if (lowerMessage.includes("new vaccin") || lowerMessage.includes("recent") || lowerMessage.includes("latest") || lowerMessage.includes("development") || lowerMessage.includes("malaria")) {
-    responseKey = "newVaccines";
+    responseKey = "newVaccines;
   } else if (lowerMessage.includes("bab") || lowerMessage.includes("child") || lowerMessage.includes("infant") || lowerMessage.includes("watoto") || lowerMessage.includes("mtoto")) {
-    responseKey = "babies";
+    responseKey = "babies;
   } else if (lowerMessage.includes("when") || lowerMessage.includes("schedule") || lowerMessage.includes("ratiba") || lowerMessage.includes("lini")) {
-    responseKey = "schedule";
+    responseKey = "schedule;
   } else if (lowerMessage.includes("mmr") || lowerMessage.includes("measles") || lowerMessage.includes("rubella") || lowerMessage.includes("surua")) {
-    responseKey = "mmr";
+    responseKey = "mmr;
   } else if (lowerMessage.includes("where") || lowerMessage.includes("location") || lowerMessage.includes("get vaccin") || lowerMessage.includes("wapi") || lowerMessage.includes("kituo")) {
-    responseKey = "location";
+    responseKey = "location;
   }
 
   const translatedContent = translateResponse(response.content, language);

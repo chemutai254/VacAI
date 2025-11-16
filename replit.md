@@ -7,12 +7,15 @@ Vaccine Village is a React Native mobile application built with Expo that provid
 ### Recent Features (November 16, 2025)
 - **Phase-Based Navigation**: Robust onboarding flow with Loading → Landing → Language → Consent → Auth → Main transitions
 - **Navigation Architecture Fix**: Resolved React hooks violations with always-mounted NavigationContainer and ref-based phase control
+- **Enhanced Authentication**: Password-based authentication with firstName/lastName fields, SHA256 password hashing, and Kenyan phone number validation
+- **Phone Normalization**: Robust utility handling all Kenyan formats (+254, 254, 0, 7, 1, spaces) with automatic legacy data migration on app startup
+- **Community Reviews**: Star rating system (1-5) with optional anonymity, proper privacy handling (real names stored, "Anonymous" displayed when toggled)
+- **Multilingual Chatbot**: Swahili translations for top 5 common responses (default, babies, schedule, location, sideEffects) with clear bilingual fallback messages for other languages
 - **Enhanced History View**: Chat history now displays full conversation pairs (Q&A) with expandable cards
 - **Improved Navigation**: Tapping Chat tab while active scrolls to top and clears input
 - **Smart Cache Management**: Chat history auto-clears after 30 minutes in background
 - **Custom Branding**: Maroon/beige app icons for iOS, Android (adaptive), and web
 - **Offline Mode**: Startup modal offers resource download for offline access
-- **User Feedback**: Star rating (1-5) and feedback form in Settings
 - **Cross-screen Sync**: Bookmarks synchronized across all screens
 - **Multilingual Support**: All new features translated to Swahili (professional translation needed for other 13 languages)
 
@@ -61,21 +64,29 @@ Preferred communication style: Simple, everyday language.
 
 **Implementation Status**: ✅ Completed
 - **User data storage**: AsyncStorage for local persistence
-- **Required fields**: Name and Kenyan phone number (E.164 format validation)
+- **Required fields**: First name, last name, Kenyan phone number (normalized to +254 format), and password (SHA256 hashed)
+- **Phone normalization**: Robust utility (utils/phoneNormalization.ts) handles all formats (+254, 254, 0, 7/1 prefixes, spaces, punctuation)
+  - Legacy data migration: Automatically normalizes existing phone numbers on app startup
+  - Consistent normalization in both signup and login flows
+- **Password security**: SHA256 hashing via Expo Crypto with secure verification (utils/password.ts)
+- **Session management**: Users must re-login after app restart (no persistent sessions for privacy/security)
 - **Location tracking**: Expo Location API for county-level health facility recommendations
-  - Location captured during login with graceful permission handling
+  - Location captured during signup with graceful permission handling
   - Can be updated later from Settings screen
   - Falls back gracefully if permissions are denied
 - **Privacy-focused**: No server-side user data transmission in current implementation
-- **Flow**: AuthScreen → LanguageSelectionScreen → Main App (4 tabs)
+- **Flow**: AuthScreen (new users) / LoginScreen (returning users) → Main App (4 tabs)
 
-**Recent Bug Fixes (Nov 16, 2025)**:
-- Fixed critical crash where login would fail when calling updateLocation before user state was set
-- Location is now captured inline during login process with proper error handling
-- updateLocation function now validates user existence before attempting updates
+**Recent Updates (Nov 16, 2025)**:
+- Enhanced with firstName/lastName fields (stored separately)
+- Password-based authentication replaces phone-only auth
+- Robust phone normalization with legacy migration
+- Fixed user state rehydration after phone number migration
 
 **Rationale**: 
-- The app prioritizes accessibility and offline functionality over user accounts
+- Password authentication provides better security for sensitive health information
+- Separate name fields enable personalized greetings and proper review attribution
+- Phone normalization ensures reliable login across different input formats
 - Local storage allows the app to function without internet connectivity
 - Future backend integration prepared through clean separation of concerns
 
@@ -99,22 +110,33 @@ Preferred communication style: Simple, everyday language.
 
 ### Chat/AI Integration
 
-**Current Implementation**: Mock chatbot service with planned AI backend
+**Current Implementation**: Mock chatbot service with multilingual support
 - **Message structure**: Typed interfaces with role, content, confidence level, and source citations
+- **Multilingual responses**: 
+  - Swahili translations for top 5 common intents (default, babies, schedule, location, sideEffects)
+  - Bilingual fallback messages for other 13 languages indicating translations are in progress
+  - Responses automatically match user's selected language
 - **Safety filtering**: `detectUnsafeQuery` function to identify potentially dangerous questions
 - **Response confidence**: High/Medium/Low badges to indicate information reliability
 - **Source citations**: Array of authoritative sources (Kenya MOH, WHO, UNICEF) per response
+- **Language-aware architecture**:
+  - `MOCK_RESPONSES_EN`: English responses for all intents
+  - `MOCK_RESPONSES_SW`: Swahili translations for high-traffic intents
+  - `getLocalizedResponse()`: Selects language-specific response with fallback
+  - `addLanguageFallback()`: Adds bilingual disclaimer for incomplete translations
 
 **Planned Architecture:**
 - RAG (Retrieval-Augmented Generation) using open-source LLMs or Hugging Face models
 - Vector embeddings for semantic search over curated vaccine knowledge base
 - Confidence scoring based on source quality and semantic similarity
 - Fallback to local health facility recommendations for low-confidence queries
+- Full translations for all 15 supported languages (currently: English + partial Swahili)
 
 **Design Rationale:**
 - Mock implementation allows UI/UX development without backend dependency
 - Clean service layer separation enables easy backend integration
 - Confidence scoring builds user trust through transparency
+- Multilingual support starts with Swahili (most widely spoken) and provides clear expectations for other languages
 
 ### Text-to-Speech (TTS)
 
