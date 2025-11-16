@@ -5,19 +5,26 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Card } from '@/components/Card';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/navigation/RootStackNavigator';
 import { Colors, Spacing, BorderRadius } from '@/constants/theme';
+import { storage } from '@/utils/storage';
 import * as Haptics from 'expo-haptics';
 
-interface LandingScreenProps {
-  onGetStarted: () => void;
-}
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Landing'>;
 
-export default function LandingScreen({ onGetStarted }: LandingScreenProps) {
+export default function LandingScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp>();
 
-  const handleGetStarted = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    onGetStarted();
+  const handleGetStarted = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await storage.setHasSeenLanding(true);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Language' }],
+    });
   };
 
   const features = [

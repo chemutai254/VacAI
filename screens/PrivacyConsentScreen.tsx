@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Pressable, ScrollView } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/navigation/RootStackNavigator';
 import { Feather } from "@expo/vector-icons";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
@@ -10,12 +13,11 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { storage } from "@/utils/storage";
 import * as Haptics from "expo-haptics";
 
-interface PrivacyConsentScreenProps {
-  onComplete: () => void;
-}
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Consent'>;
 
-export default function PrivacyConsentScreen({ onComplete }: PrivacyConsentScreenProps) {
+export default function PrivacyConsentScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp>();
   const { t } = useLanguage();
   const [acceptedConsent, setAcceptedConsent] = useState<boolean | null>(null);
 
@@ -23,14 +25,24 @@ export default function PrivacyConsentScreen({ onComplete }: PrivacyConsentScree
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await storage.setDataConsent(true);
     setAcceptedConsent(true);
-    setTimeout(onComplete, 100);
+    setTimeout(() => {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }],
+      });
+    }, 100);
   };
 
   const handleDecline = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await storage.setDataConsent(false);
     setAcceptedConsent(false);
-    setTimeout(onComplete, 100);
+    setTimeout(() => {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }],
+      });
+    }, 100);
   };
 
   return (

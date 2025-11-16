@@ -4,17 +4,19 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import LanguageSelector from "@/components/LanguageSelector";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '@/navigation/RootStackNavigator';
 import { BorderRadius, Colors, Spacing } from "@/constants/theme";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { DEFAULT_LANGUAGE } from "@/constants/languages";
 import * as Haptics from "expo-haptics";
 
-interface LanguageSelectionScreenProps {
-  onComplete: () => void;
-}
+type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Language'>;
 
-export default function LanguageSelectionScreen({ onComplete }: LanguageSelectionScreenProps) {
+export default function LanguageSelectionScreen() {
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NavigationProp>();
   const { language, setLanguage, setIsLanguageSelected, t } = useLanguage();
   const [selectedLang, setSelectedLang] = useState(language || DEFAULT_LANGUAGE);
 
@@ -22,7 +24,10 @@ export default function LanguageSelectionScreen({ onComplete }: LanguageSelectio
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await setLanguage(selectedLang);
     await setIsLanguageSelected(true);
-    onComplete();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Consent' }],
+    });
   };
 
   return (

@@ -1,139 +1,56 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, ActivityIndicator, View } from "react-native";
-import { NavigationContainer } from "@react-navigation/native";
+import React, { useEffect, useState, useRef } from "react";
+import { StyleSheet } from "react-native";
+import { NavigationContainer, useNavigationContainerRef } from "@react-navigation/native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
-import MainTabNavigator from "@/navigation/MainTabNavigator";
-import LandingScreen from "@/screens/LandingScreen";
-import LanguageSelectionScreen from "@/screens/LanguageSelectionScreen";
-import PrivacyConsentScreen from "@/screens/PrivacyConsentScreen";
-import AuthScreen from "@/screens/AuthScreen";
-import OfflineDownloadModal from "@/components/OfflineDownloadModal";
-import { VaccinationStatsModal } from "@/components/VaccinationStatsModal";
+import RootStackNavigator, { type RootStackParamList } from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
-import { AuthProvider, useAuth } from "@/contexts/AuthContext";
-import { ThemedView } from "@/components/ThemedView";
-import { storage } from "@/utils/storage";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { useAppStateCleanup } from "@/hooks/useAppStateCleanup";
+import { useOnboardingState, type OnboardingPhase } from "@/hooks/useOnboardingState";
 
 function AppContent() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isLanguageSelected } = useLanguage();
-  const [showLanding, setShowLanding] = useState(false);
-  const [showLanguageSelection, setShowLanguageSelection] = useState(!isLanguageSelected);
-  const [showPrivacyConsent, setShowPrivacyConsent] = useState(false);
-  const [showOfflineDownload, setShowOfflineDownload] = useState(false);
-  const [showVaccinationStats, setShowVaccinationStats] = useState(false);
-  const [isCheckingConsent, setIsCheckingConsent] = useState(true);
-  const [isCheckingLanding, setIsCheckingLanding] = useState(true);
-
+  const phase = useOnboardingState();
+  const navigationRef = useNavigationContainerRef<RootStackParamList>();
+  const [isReady, setIsReady] = useState(false);
+  const lastAppliedRoute = useRef<keyof RootStackParamList | null>(null);
+  
   useAppStateCleanup();
 
   useEffect(() => {
-    setShowLanguageSelection(!isLanguageSelected);
-  }, [isLanguageSelected]);
+    if (!isReady || !navigationRef.isReady()) return;
 
-  useEffect(() => {
-    checkLandingStatus();
-    checkPrivacyConsent();
-  }, []);
+    const routeMap: Record<OnboardingPhase, keyof RootStackParamList> = {
+      loading: 'Loading',
+      landing: 'Landing',
+      language: 'Language',
+      consent: 'Consent',
+      auth: 'Auth',
+      main: 'Main',
+    };
 
-  useEffect(() => {
-    if (isAuthenticated && !showPrivacyConsent && !showLanguageSelection) {
-      checkVaccinationStats();
-      checkOfflineDownload();
+    const targetRoute = routeMap[phase];
+    
+    if (targetRoute && lastAppliedRoute.current !== targetRoute) {
+      lastAppliedRoute.current = targetRoute;
+      navigationRef.reset({
+        index: 0,
+        routes: [{ name: targetRoute }],
+      });
     }
-  }, [isAuthenticated, showPrivacyConsent, showLanguageSelection]);
-
-  const checkLandingStatus = async () => {
-    const hasSeenLanding = await storage.getHasSeenLanding();
-    setShowLanding(!hasSeenLanding);
-    setIsCheckingLanding(false);
-  };
-
-  const checkVaccinationStats = async () => {
-    const hasSeenStats = await storage.getHasSeenVaccinationStats();
-    if (!hasSeenStats) {
-      setShowVaccinationStats(true);
-    }
-  };
-
-  const checkPrivacyConsent = async () => {
-    const consentValue = await storage.getDataConsent();
-    const hasSetConsent = consentValue !== null;
-    setShowPrivacyConsent(!hasSetConsent);
-    setIsCheckingConsent(false);
-  };
-
-  const checkOfflineDownload = async () => {
-    const downloaded = await storage.getOfflineDownloaded();
-    const dismissed = await storage.getOfflinePromptDismissed();
-    if (!downloaded && !dismissed) {
-      setShowOfflineDownload(true);
-    }
-  };
-
-  const handleDownloadOffline = async () => {
-    await storage.setOfflineDownloaded(true);
-    setShowOfflineDownload(false);
-  };
-
-  const handleSkipOffline = async () => {
-    await storage.setOfflinePromptDismissed(true);
-    setShowOfflineDownload(false);
-  };
-
-  const isLoading = authLoading || isCheckingConsent || isCheckingLanding;
+  }, [phase, isReady, navigationRef]);
 
   return (
-    <>
-      {isLoading ? (
-        <ThemedView style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
-        </ThemedView>
-      ) : showLanding ? (
-        <LandingScreen
-          onGetStarted={async () => {
-            await storage.setHasSeenLanding(true);
-            setShowLanding(false);
-          }}
-        />
-      ) : showLanguageSelection ? (
-        <LanguageSelectionScreen
-          onComplete={() => setShowLanguageSelection(false)}
-        />
-      ) : showPrivacyConsent ? (
-        <PrivacyConsentScreen
-          onComplete={() => setShowPrivacyConsent(false)}
-        />
-      ) : !isAuthenticated ? (
-        <AuthScreen />
-      ) : (
-        <NavigationContainer>
-          <MainTabNavigator />
-        </NavigationContainer>
-      )}
-      {isAuthenticated && !isLoading && !showLanding && !showLanguageSelection && !showPrivacyConsent && (
-        <>
-          <OfflineDownloadModal
-            visible={showOfflineDownload}
-            onDownload={handleDownloadOffline}
-            onSkip={handleSkipOffline}
-          />
-          <VaccinationStatsModal
-            visible={showVaccinationStats}
-            onClose={async () => {
-              await storage.setHasSeenVaccinationStats(true);
-              setShowVaccinationStats(false);
-            }}
-          />
-        </>
-      )}
-    </>
+    <NavigationContainer 
+      ref={navigationRef}
+      onReady={() => setIsReady(true)}
+    >
+      <RootStackNavigator phase={phase} />
+    </NavigationContainer>
   );
 }
 

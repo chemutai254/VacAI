@@ -5,6 +5,8 @@
 Vaccine Village is a React Native mobile application built with Expo that provides multilingual vaccine education for Kenyan communities. The app serves as an accessible educational tool offering AI-powered chatbot assistance (mock service), curated vaccine resources, and offline-capable content in English, Swahili, and 13 indigenous Kenyan languages. It emphasizes privacy, low-bandwidth compatibility, and culturally appropriate health information delivery.
 
 ### Recent Features (November 16, 2025)
+- **Phase-Based Navigation**: Robust onboarding flow with Loading → Landing → Language → Consent → Auth → Main transitions
+- **Navigation Architecture Fix**: Resolved React hooks violations with always-mounted NavigationContainer and ref-based phase control
 - **Enhanced History View**: Chat history now displays full conversation pairs (Q&A) with expandable cards
 - **Improved Navigation**: Tapping Chat tab while active scrolls to top and clears input
 - **Smart Cache Management**: Chat history auto-clears after 30 minutes in background
@@ -32,10 +34,14 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: StyleSheet-based styling with centralized theme constants
 
 **Navigation Structure:**
+- **Phase-based architecture**: Always-mounted NavigationContainer with RootStackNavigator controlling all screens
+- **Onboarding phases**: Loading → Landing (first-time) → Language → Consent → Auth → Main
+- **useOnboardingState hook**: Centralized phase management with AsyncStorage persistence
+- **NavigationRef control**: Uses useNavigationContainerRef with onReady guard and route deduplication
 - **Tab-based navigation** with 4 main tabs: Chat (Home), Resources, Saved, Settings
 - **Stack navigators** for each tab to support future nested navigation
 - **Floating Action Button** on Resources and Saved tabs for quick chat access
-- **Initial onboarding flow**: Language selection → Authentication → Main app
+- **MainPhaseEffects**: Modal management (OfflineDownload, VaccinationStats) only during 'main' phase
 
 **Key Design Decisions:**
 - **Color scheme**: Maroon (#800020) primary, Beige (#F5F5DC) accent, with comprehensive light/dark theme support
