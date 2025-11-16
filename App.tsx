@@ -8,31 +8,42 @@ import { StatusBar } from "expo-status-bar";
 
 import MainTabNavigator from "@/navigation/MainTabNavigator";
 import LanguageSelectionScreen from "@/screens/LanguageSelectionScreen";
+import PrivacyConsentScreen from "@/screens/PrivacyConsentScreen";
 import AuthScreen from "@/screens/AuthScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemedView } from "@/components/ThemedView";
+import { storage } from "@/utils/storage";
 
 function AppContent() {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLanguageSelected } = useLanguage();
   const [showLanguageSelection, setShowLanguageSelection] = useState(!isLanguageSelected);
+  const [showPrivacyConsent, setShowPrivacyConsent] = useState(false);
+  const [isCheckingConsent, setIsCheckingConsent] = useState(true);
 
   useEffect(() => {
     setShowLanguageSelection(!isLanguageSelected);
   }, [isLanguageSelected]);
 
-  if (authLoading) {
+  useEffect(() => {
+    checkPrivacyConsent();
+  }, []);
+
+  const checkPrivacyConsent = async () => {
+    const consentValue = await storage.getDataConsent();
+    const hasSetConsent = consentValue !== null;
+    setShowPrivacyConsent(!hasSetConsent);
+    setIsCheckingConsent(false);
+  };
+
+  if (authLoading || isCheckingConsent) {
     return (
       <ThemedView style={styles.loadingContainer}>
         <ActivityIndicator size="large" />
       </ThemedView>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <AuthScreen />;
   }
 
   if (showLanguageSelection) {
@@ -41,6 +52,18 @@ function AppContent() {
         onComplete={() => setShowLanguageSelection(false)}
       />
     );
+  }
+
+  if (showPrivacyConsent) {
+    return (
+      <PrivacyConsentScreen
+        onComplete={() => setShowPrivacyConsent(false)}
+      />
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <AuthScreen />;
   }
 
   return (

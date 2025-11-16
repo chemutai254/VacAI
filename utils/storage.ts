@@ -84,13 +84,14 @@ export const storage = {
     }
   },
 
-  async getDataConsent(): Promise<boolean> {
+  async getDataConsent(): Promise<boolean | null> {
     try {
       const value = await AsyncStorage.getItem(KEYS.DATA_CONSENT);
+      if (value === null) return null;
       return value === "true";
     } catch (error) {
       console.error("Error getting data consent:", error);
-      return false;
+      return null;
     }
   },
 

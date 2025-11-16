@@ -27,7 +27,7 @@ export default function SettingsScreen() {
 
   const loadSettings = async () => {
     const consent = await storage.getDataConsent();
-    setDataConsent(consent);
+    setDataConsent(consent === true);
   };
 
   const toggleDataConsent = async (value: boolean) => {
