@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { reloadAppAsync } from "expo";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,11 +44,22 @@ export default function LoginScreen() {
       const success = await loginWithPhone(phoneNumber.trim());
       if (!success) {
         setError("Phone number not found. Please sign up first.");
-        setIsLoading(false);
       }
     } catch (err) {
       setError("Failed to log in. Please try again.");
+    } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleCreateAccount = async () => {
+    try {
+      await AsyncStorage.removeItem("@vaccine_village_user_profile");
+      await AsyncStorage.removeItem("@vaccine_village_onboarding_completed");
+      await AsyncStorage.removeItem("@vaccine_village_language");
+      await reloadAppAsync();
+    } catch (err) {
+      console.error("Failed to reset app:", err);
     }
   };
 
@@ -144,6 +157,31 @@ export default function LoginScreen() {
                 Enter the phone number you used to sign up
               </ThemedText>
             </View>
+
+            <View style={styles.divider}>
+              <View style={styles.dividerLine} />
+              <ThemedText style={styles.dividerText}>or</ThemedText>
+              <View style={styles.dividerLine} />
+            </View>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.secondaryButton,
+                {
+                  borderColor: Colors.light.primary,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+              onPress={handleCreateAccount}
+              disabled={isLoading}
+            >
+              <ThemedText
+                type="body"
+                style={[styles.secondaryButtonText, { color: Colors.light.primary }]}
+              >
+                Create New Account
+              </ThemedText>
+            </Pressable>
           </View>
         </View>
       </KeyboardAvoidingView>
@@ -232,5 +270,31 @@ const styles = StyleSheet.create({
     fontSize: 14,
     flex: 1,
     opacity: 0.8,
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: Spacing.lg,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(128, 128, 128, 0.2)",
+  },
+  dividerText: {
+    paddingHorizontal: Spacing.md,
+    opacity: 0.5,
+    fontSize: 14,
+  },
+  secondaryButton: {
+    height: Spacing.buttonHeight,
+    borderRadius: BorderRadius.button,
+    borderWidth: 2,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  secondaryButtonText: {
+    fontWeight: "600",
   },
 });
