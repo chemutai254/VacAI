@@ -10,7 +10,7 @@ Vaccine Village is a React Native mobile application built with Expo that provid
 - **Enhanced Authentication**: Password-based authentication with firstName/lastName fields, SHA256 password hashing, and Kenyan phone number validation
 - **Phone Normalization**: Robust utility handling all Kenyan formats (+254, 254, 0, 7, 1, spaces) with automatic legacy data migration on app startup
 - **Community Reviews**: Star rating system (1-5) with optional anonymity, proper privacy handling (real names stored, "Anonymous" displayed when toggled)
-- **Multilingual Chatbot**: Swahili translations for top 5 common responses (default, babies, schedule, location, sideEffects) with clear bilingual fallback messages for other languages
+- **Multilingual Chatbot**: Complete translations for ALL 15 languages for top 5 common responses (default, babies, schedule, location, sideEffects) - users now receive fully native responses in their selected language without English fallbacks
 - **Enhanced History View**: Chat history now displays full conversation pairs (Q&A) with expandable cards
 - **Improved Navigation**: Tapping Chat tab while active scrolls to top and clears input
 - **Smart Cache Management**: Chat history auto-clears after 30 minutes in background
@@ -99,9 +99,9 @@ Preferred communication style: Simple, everyday language.
 - **Resource localization**: All vaccine resources include translations for title and summary
 
 **Translation Status (Nov 16, 2025)**:
-- **Fully translated**: English, Swahili, Kikuyu, Luo, Kamba, Luyia, Kalenjin, Somali (8 languages)
-- **Placeholder/Awaiting professional translation**: Mijikenda, Turkana, Samburu, Maasai, Rendille, Embu, Meru (7 languages)
-- Human-in-the-loop professional translation review workflow planned for placeholder languages
+- **Fully translated chatbot responses**: ALL 15 languages (English, Swahili, Kikuyu, Luo, Kamba, Luyia, Kalenjin, Somali, Mijikenda, Turkana, Samburu, Maasai, Rendille, Embu, Meru) - complete translations for top 5 common intents (default, babies, schedule, location, sideEffects)
+- **UI translations**: English and Swahili fully translated; remaining 13 languages awaiting professional translation
+- Human-in-the-loop professional translation review workflow planned for all language content
 
 **Design Decision:**
 - Built custom lightweight i18n instead of heavy libraries (like i18next) to reduce bundle size
@@ -110,33 +110,33 @@ Preferred communication style: Simple, everyday language.
 
 ### Chat/AI Integration
 
-**Current Implementation**: Mock chatbot service with multilingual support
+**Current Implementation**: Mock chatbot service with comprehensive multilingual support
 - **Message structure**: Typed interfaces with role, content, confidence level, and source citations
 - **Multilingual responses**: 
-  - Swahili translations for top 5 common intents (default, babies, schedule, location, sideEffects)
-  - Bilingual fallback messages for other 13 languages indicating translations are in progress
-  - Responses automatically match user's selected language
+  - Complete translations for ALL 15 languages for top 5 common intents (default, babies, schedule, location, sideEffects)
+  - Responses automatically match user's selected language without English fallbacks
+  - Each language has native translations providing culturally appropriate health information
 - **Safety filtering**: `detectUnsafeQuery` function to identify potentially dangerous questions
 - **Response confidence**: High/Medium/Low badges to indicate information reliability
 - **Source citations**: Array of authoritative sources (Kenya MOH, WHO, UNICEF) per response
 - **Language-aware architecture**:
-  - `MOCK_RESPONSES_EN`: English responses for all intents
-  - `MOCK_RESPONSES_SW`: Swahili translations for high-traffic intents
-  - `getLocalizedResponse()`: Selects language-specific response with fallback
-  - `addLanguageFallback()`: Adds bilingual disclaimer for incomplete translations
+  - `LANGUAGE_RESPONSE_MAP`: Central registry mapping all 15 languages to their response dictionaries
+  - Individual response dictionaries for each language (e.g., `MOCK_RESPONSES_EN`, `MOCK_RESPONSES_SW`, `MOCK_RESPONSES_KIK`, etc.)
+  - `getLocalizedResponse()`: Selects language-specific response with graceful fallbacks
+  - `addLanguageFallback()`: No longer needed for top 5 intents as all languages are fully translated
 
 **Planned Architecture:**
 - RAG (Retrieval-Augmented Generation) using open-source LLMs or Hugging Face models
 - Vector embeddings for semantic search over curated vaccine knowledge base
 - Confidence scoring based on source quality and semantic similarity
 - Fallback to local health facility recommendations for low-confidence queries
-- Full translations for all 15 supported languages (currently: English + partial Swahili)
+- Expansion of translations beyond top 5 intents to cover all 19 vaccine topics
 
 **Design Rationale:**
 - Mock implementation allows UI/UX development without backend dependency
 - Clean service layer separation enables easy backend integration
 - Confidence scoring builds user trust through transparency
-- Multilingual support starts with Swahili (most widely spoken) and provides clear expectations for other languages
+- Complete multilingual coverage ensures equitable access to health information across all language communities
 
 ### Text-to-Speech (TTS)
 
