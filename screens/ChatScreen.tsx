@@ -24,7 +24,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { sendChatMessage, detectUnsafeQuery, ChatMessage } from "@/services/chatbot";
 import { storage } from "@/utils/storage";
 import * as Haptics from "expo-haptics";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -32,6 +32,7 @@ export default function ChatScreen() {
   const { t, language } = useLanguage();
   const { theme } = useTheme();
   const scrollViewRef = useRef<ScrollView>(null);
+  const navigation = useNavigation();
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputText, setInputText] = useState("");
@@ -46,6 +47,15 @@ export default function ChatScreen() {
     loadChatHistory();
     checkHowToUseDismissed();
   }, []);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('tabPress', (e) => {
+      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
+      setInputText("");
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   useFocusEffect(
     React.useCallback(() => {
