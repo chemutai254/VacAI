@@ -1,9 +1,8 @@
-import { Platform, useColorScheme } from "react-native";
+import { Platform, ColorSchemeName } from "react-native";
 import { NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import { isLiquidGlassAvailable } from "expo-glass-effect";
 
-export const getCommonScreenOptions = (): NativeStackNavigationOptions => {
-  const colorScheme = useColorScheme();
+export const getCommonScreenOptions = (colorScheme: ColorSchemeName): NativeStackNavigationOptions => {
   const isDark = colorScheme === "dark";
 
   return {

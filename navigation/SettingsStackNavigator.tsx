@@ -1,4 +1,5 @@
 import React from "react";
+import { useColorScheme } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SettingsScreen from "@/screens/SettingsScreen";
 import FeedbackScreen from "@/screens/FeedbackScreen";
@@ -13,8 +14,10 @@ export type SettingsStackParamList = {
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
 export default function SettingsStackNavigator() {
+  const colorScheme = useColorScheme();
+  
   return (
-    <Stack.Navigator screenOptions={getCommonScreenOptions}>
+    <Stack.Navigator screenOptions={getCommonScreenOptions(colorScheme)}>
       <Stack.Screen
         name="Settings"
         component={SettingsScreen}
