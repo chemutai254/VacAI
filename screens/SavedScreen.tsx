@@ -19,8 +19,9 @@ export default function SavedScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { t } = useLanguage();
   const navigation = useNavigation<any>();
-  const [selectedTab, setSelectedTab] = useState<"bookmarks" | "history">("bookmarks");
+  const [selectedTab, setSelectedTab] = useState<"bookmarks" | "messages" | "history">("bookmarks");
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
+  const [bookmarkedMessages, setBookmarkedMessages] = useState<ChatMessage[]>([]);
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
 
   useFocusEffect(
@@ -31,8 +32,10 @@ export default function SavedScreen() {
 
   const loadData = async () => {
     const bookmarks = await storage.getBookmarkedResources();
+    const messages = await storage.getBookmarkedMessages();
     const history = await storage.getChatHistory();
     setBookmarkedIds(bookmarks);
+    setBookmarkedMessages(messages);
     setChatHistory(history);
   };
 
@@ -40,6 +43,12 @@ export default function SavedScreen() {
     const newBookmarks = bookmarkedIds.filter((id) => id !== resourceId);
     setBookmarkedIds(newBookmarks);
     await storage.setBookmarkedResources(newBookmarks);
+  };
+
+  const removeBookmarkedMessage = async (messageId: string) => {
+    const newBookmarks = bookmarkedMessages.filter((m) => m.id !== messageId);
+    setBookmarkedMessages(newBookmarks);
+    await storage.setBookmarkedMessages(newBookmarks);
   };
 
   const handleAskQuestion = () => {
@@ -69,6 +78,22 @@ export default function SavedScreen() {
             ]}
           >
             {t("bookmarks")}
+          </ThemedText>
+        </Pressable>
+        <Pressable
+          onPress={() => setSelectedTab("messages")}
+          style={[
+            styles.tab,
+            selectedTab === "messages" && styles.activeTab,
+          ]}
+        >
+          <ThemedText
+            style={[
+              styles.tabText,
+              selectedTab === "messages" && styles.activeTabText,
+            ]}
+          >
+            {t("bookmarkedMessages")}
           </ThemedText>
         </Pressable>
         <Pressable
@@ -112,6 +137,46 @@ export default function SavedScreen() {
                   isBookmarked={true}
                   onToggleBookmark={() => toggleBookmark(resource.id)}
                 />
+              ))
+            )}
+          </>
+        )}
+
+        {selectedTab === "messages" && (
+          <>
+            {bookmarkedMessages.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Feather name="message-square" size={64} color={Colors.light.mediumGray} />
+                <ThemedText style={styles.emptyText}>
+                  {t("noSavedItems")}
+                </ThemedText>
+              </View>
+            ) : (
+              bookmarkedMessages.map((message) => (
+                <Card key={message.id} style={styles.messageCard}>
+                  <View style={styles.messageHeader}>
+                    <ThemedText style={styles.messageContent}>
+                      {message.content}
+                    </ThemedText>
+                    <Pressable
+                      onPress={() => removeBookmarkedMessage(message.id)}
+                      style={styles.removeButton}
+                    >
+                      <Feather name="x" size={20} color={Colors.light.mediumGray} />
+                    </Pressable>
+                  </View>
+                  {message.sources && message.sources.length > 0 && (
+                    <View style={styles.sourcesContainer}>
+                      <Feather name="book-open" size={14} color={Colors.light.mediumGray} />
+                      <ThemedText style={styles.sourcesText}>
+                        {message.sources.length} {message.sources.length === 1 ? t("source").toLowerCase() : t("sourcesTitle").toLowerCase()}
+                      </ThemedText>
+                    </View>
+                  )}
+                  <ThemedText style={styles.messageDate}>
+                    {new Date(message.timestamp).toLocaleDateString()}
+                  </ThemedText>
+                </Card>
               ))
             )}
           </>
@@ -196,6 +261,38 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   historyDate: {
+    fontSize: 12,
+    color: Colors.light.mediumGray,
+  },
+  messageCard: {
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+  },
+  messageHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: Spacing.sm,
+  },
+  messageContent: {
+    fontSize: 16,
+    flex: 1,
+    marginRight: Spacing.sm,
+  },
+  removeButton: {
+    padding: Spacing.xs,
+  },
+  sourcesContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  sourcesText: {
+    fontSize: 12,
+    color: Colors.light.mediumGray,
+  },
+  messageDate: {
     fontSize: 12,
     color: Colors.light.mediumGray,
   },

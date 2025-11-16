@@ -24,6 +24,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { sendChatMessage, detectUnsafeQuery, ChatMessage } from "@/services/chatbot";
 import { storage } from "@/utils/storage";
 import * as Haptics from "expo-haptics";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function ChatScreen() {
   const insets = useSafeAreaInsets();
@@ -39,13 +40,18 @@ export default function ChatScreen() {
   const [showSources, setShowSources] = useState(false);
   const [selectedSources, setSelectedSources] = useState<string[]>([]);
   const [showUnsafeWarning, setShowUnsafeWarning] = useState(false);
-  const [bookmarkedMessageIds, setBookmarkedMessageIds] = useState<string[]>([]);
+  const [bookmarkedMessages, setBookmarkedMessages] = useState<ChatMessage[]>([]);
 
   useEffect(() => {
     loadChatHistory();
     checkHowToUseDismissed();
-    loadBookmarkedMessages();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadBookmarkedMessages();
+    }, [])
+  );
 
   const loadChatHistory = async () => {
     const history = await storage.getChatHistory();
@@ -65,15 +71,19 @@ export default function ChatScreen() {
 
   const loadBookmarkedMessages = async () => {
     const bookmarked = await storage.getBookmarkedMessages();
-    setBookmarkedMessageIds(bookmarked);
+    setBookmarkedMessages(bookmarked);
   };
 
   const toggleBookmark = async (messageId: string) => {
-    const newBookmarks = bookmarkedMessageIds.includes(messageId)
-      ? bookmarkedMessageIds.filter(id => id !== messageId)
-      : [...bookmarkedMessageIds, messageId];
+    const message = messages.find(m => m.id === messageId);
+    if (!message) return;
+
+    const isCurrentlyBookmarked = bookmarkedMessages.some(m => m.id === messageId);
+    const newBookmarks = isCurrentlyBookmarked
+      ? bookmarkedMessages.filter(m => m.id !== messageId)
+      : [...bookmarkedMessages, message];
     
-    setBookmarkedMessageIds(newBookmarks);
+    setBookmarkedMessages(newBookmarks);
     await storage.setBookmarkedMessages(newBookmarks);
   };
 
@@ -199,7 +209,7 @@ export default function ChatScreen() {
               onCiteSources={() =>
                 message.sources && handleCiteSources(message.sources)
               }
-              isBookmarked={bookmarkedMessageIds.includes(message.id)}
+              isBookmarked={bookmarkedMessages.some(m => m.id === message.id)}
               onToggleBookmark={toggleBookmark}
             />
           ))}

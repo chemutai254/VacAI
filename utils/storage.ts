@@ -122,7 +122,7 @@ export const storage = {
     }
   },
 
-  async getBookmarkedMessages(): Promise<string[]> {
+  async getBookmarkedMessages(): Promise<any[]> {
     try {
       const value = await AsyncStorage.getItem(KEYS.BOOKMARKED_MESSAGES);
       return value ? JSON.parse(value) : [];
@@ -132,11 +132,11 @@ export const storage = {
     }
   },
 
-  async setBookmarkedMessages(messageIds: string[]): Promise<void> {
+  async setBookmarkedMessages(messages: any[]): Promise<void> {
     try {
       await AsyncStorage.setItem(
         KEYS.BOOKMARKED_MESSAGES,
-        JSON.stringify(messageIds)
+        JSON.stringify(messages)
       );
     } catch (error) {
       console.error("Error setting bookmarked messages:", error);
