@@ -22,8 +22,8 @@ Preferred communication style: Simple, everyday language.
 - **Styling**: StyleSheet-based with centralized theme constants
 
 **Navigation Structure:**
-- **Phase-based architecture**: RootStackNavigator controls Loading → Landing → Language → Consent → Auth → Main transitions.
-- **Tab-based navigation** with 4 main tabs: Chat, Resources, Saved, Settings.
+- **Phase-based architecture**: RootStackNavigator controls Loading → Landing → Language → Consent → Main transitions.
+- **Tab-based navigation** with 4 main tabs: Chat, Communities, Resources, Settings.
 - Stack navigators for each tab support nested navigation.
 
 **Key Design Decisions:**
@@ -34,13 +34,13 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication System
 
-**Implementation Status**: Completed (Google OAuth)
-- **Authentication Method**: Google OAuth 2.0 via `expo-auth-session`.
-- **User Profile Data**: Automatically populated from Google account (email, name, profile picture, Google ID).
-- **Session Management**: OAuth flow with token exchange; user profile cached in AsyncStorage for offline access.
-- **Legacy Migration**: Automatic detection and cleanup of old phone/password profiles.
-- **Location Services**: Expo Location API for county-level health facility recommendations, captured during first sign-in.
-- **Privacy-focused**: No server-side user data transmission in current implementation.
+**Implementation Status**: Guest Mode (No Authentication Required)
+- **Authentication Method**: None - app runs in guest mode by default.
+- **User Profile Data**: Auto-created guest user profile on first launch with simplified structure: `{ id: "guest_${timestamp}", name: "Guest User", createdAt: ISO string }`.
+- **Session Management**: Guest profile persisted in AsyncStorage for consistency across sessions.
+- **Location Services**: Expo Location API for county-level health facility recommendations, optionally captured on first launch.
+- **Privacy-focused**: No server-side user data transmission; all data stored locally. No authentication credentials required or collected.
+- **Feature Access**: All features (chat, reviews, bookmarks, settings) accessible without sign-in.
 
 ### Internationalization (i18n)
 
@@ -111,7 +111,6 @@ Preferred communication style: Simple, everyday language.
 - **expo-speech**: Text-to-speech.
 - **expo-location**: Optional geolocation.
 - **expo-web-browser**: In-app browser.
-- **expo-auth-session**: Google OAuth.
 
 ### Navigation
 - **@react-navigation/native**: Core framework.
