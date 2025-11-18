@@ -28,7 +28,7 @@ export default function PrivacyConsentScreen() {
     setTimeout(() => {
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Auth' }],
+        routes: [{ name: 'Main' }],
       });
     }, 100);
   };
@@ -40,7 +40,7 @@ export default function PrivacyConsentScreen() {
     setTimeout(() => {
       navigation.reset({
         index: 0,
-        routes: [{ name: 'Auth' }],
+        routes: [{ name: 'Main' }],
       });
     }, 100);
   };

@@ -29,8 +29,8 @@ function AppContent() {
       landing: 'Landing',
       language: 'Language',
       consent: 'Consent',
-      auth: 'Auth',
-      login: 'Login',
+      auth: 'Main',
+      login: 'Main',
       main: 'Main',
     };
 
