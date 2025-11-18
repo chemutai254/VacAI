@@ -44,8 +44,7 @@ export function ReviewSubmissionForm({ onSubmitSuccess }: ReviewSubmissionFormPr
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      const userName = `${user.firstName} ${user.lastName}`;
-      const review = createReview(user.id, userName, isAnonymous, rating, feedback.trim());
+      const review = createReview(user.id, user.name, isAnonymous, rating, feedback.trim());
       await addReview(review);
 
       setRating(0);

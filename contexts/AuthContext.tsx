@@ -1,15 +1,19 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Location from "expo-location";
-import { hashPassword, verifyPassword } from "@/utils/password";
-import { normalizeKenyanPhone } from "@/utils/phoneNormalization";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
+import Constants from "expo-constants";
+
+WebBrowser.maybeCompleteAuthSession();
 
 interface User {
   id: string;
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  passwordHash: string;
+  email: string;
+  name: string;
+  profilePicture?: string;
+  googleId: string;
+  phoneNumber?: string;
   location?: {
     latitude: number;
     longitude: number;
@@ -24,10 +28,10 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   hasExistingProfile: boolean;
-  signup: (firstName: string, lastName: string, phoneNumber: string, password: string) => Promise<void>;
-  login: (phoneNumber: string, password: string) => Promise<boolean>;
+  signInWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
   updateLocation: () => Promise<void>;
+  updatePhoneNumber: (phoneNumber: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,30 +43,107 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasExistingProfile, setHasExistingProfile] = useState(false);
 
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    webClientId: Constants.expoConfig?.extra?.googleWebClientId,
+    iosClientId: Constants.expoConfig?.extra?.googleIosClientId,
+    androidClientId: Constants.expoConfig?.extra?.googleAndroidClientId,
+  });
+
   useEffect(() => {
     loadUser();
   }, []);
+
+  useEffect(() => {
+    if (response?.type === "success") {
+      handleGoogleResponse(response);
+    }
+  }, [response]);
 
   const loadUser = async () => {
     try {
       const profileJson = await AsyncStorage.getItem(USER_PROFILE_STORAGE_KEY);
       if (profileJson) {
-        setHasExistingProfile(true);
+        const profile = JSON.parse(profileJson);
         
-        let profile: User = JSON.parse(profileJson);
-        const normalizedPhone = normalizeKenyanPhone(profile.phoneNumber);
-        
-        if (normalizedPhone !== profile.phoneNumber) {
-          profile = { ...profile, phoneNumber: normalizedPhone };
-          await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(profile));
+        if (!profile.googleId || !profile.email || !profile.name) {
+          console.log("Legacy profile detected, clearing for Google OAuth migration");
+          await AsyncStorage.removeItem(USER_PROFILE_STORAGE_KEY);
+          setHasExistingProfile(false);
+          setUser(null);
+        } else {
+          setHasExistingProfile(true);
+          setUser(profile);
         }
-        
-        setUser(profile);
       }
     } catch (error) {
       console.error("Failed to load user profile:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleGoogleResponse = async (response: any) => {
+    try {
+      const { authentication } = response;
+      if (!authentication?.accessToken) {
+        console.error("No access token received");
+        return;
+      }
+
+      const userInfoResponse = await fetch(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        {
+          headers: { Authorization: `Bearer ${authentication.accessToken}` },
+        }
+      );
+
+      const userInfo = await userInfoResponse.json();
+
+      const existingProfileJson = await AsyncStorage.getItem(USER_PROFILE_STORAGE_KEY);
+      let newUser: User;
+
+      if (existingProfileJson) {
+        const existingProfile: User = JSON.parse(existingProfileJson);
+        newUser = {
+          ...existingProfile,
+          email: userInfo.email,
+          name: userInfo.name,
+          profilePicture: userInfo.picture,
+          googleId: userInfo.sub,
+        };
+      } else {
+        newUser = {
+          id: `user_${Date.now()}`,
+          email: userInfo.email,
+          name: userInfo.name,
+          profilePicture: userInfo.picture,
+          googleId: userInfo.sub,
+          createdAt: new Date().toISOString(),
+        };
+
+        try {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          if (status === "granted") {
+            const location = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+            });
+
+            newUser.location = {
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+              timestamp: Date.now(),
+            };
+          }
+        } catch (locationError) {
+          console.log("Location capture failed during signup, continuing without location:", locationError);
+        }
+      }
+
+      await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(newUser));
+      setUser(newUser);
+      setHasExistingProfile(true);
+    } catch (error) {
+      console.error("Failed to process Google sign-in:", error);
     }
   };
 
@@ -100,76 +181,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (firstName: string, lastName: string, phoneNumber: string, password: string) => {
+  const signInWithGoogle = async () => {
     try {
-      const passwordHash = await hashPassword(password);
-      const normalizedPhone = normalizeKenyanPhone(phoneNumber);
-      
-      const newUser: User = {
-        id: `user_${Date.now()}`,
-        firstName,
-        lastName,
-        phoneNumber: normalizedPhone,
-        passwordHash,
-        createdAt: new Date().toISOString(),
-      };
-
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === "granted") {
-          const location = await Location.getCurrentPositionAsync({
-            accuracy: Location.Accuracy.Balanced,
-          });
-          
-          newUser.location = {
-            latitude: location.coords.latitude,
-            longitude: location.coords.longitude,
-            timestamp: Date.now(),
-          };
-        }
-      } catch (locationError) {
-        console.log("Location capture failed during signup, continuing without location:", locationError);
-      }
-
-      await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(newUser));
-      setUser(newUser);
-      setHasExistingProfile(true);
+      await promptAsync();
     } catch (error) {
-      console.error("Failed to signup:", error);
+      console.error("Failed to initiate Google sign-in:", error);
       throw error;
     }
   };
 
-  const login = async (phoneNumber: string, password: string): Promise<boolean> => {
+  const updatePhoneNumber = async (phoneNumber: string) => {
+    if (!user) {
+      console.log("No user found, cannot update phone number");
+      return;
+    }
+
     try {
-      const profileJson = await AsyncStorage.getItem(USER_PROFILE_STORAGE_KEY);
-      if (!profileJson) {
-        return false;
-      }
+      const updatedUser = {
+        ...user,
+        phoneNumber,
+      };
 
-      const profile: User = JSON.parse(profileJson);
-      const normalizedInputPhone = normalizeKenyanPhone(phoneNumber);
-
-      if (normalizedInputPhone !== profile.phoneNumber) {
-        return false;
-      }
-
-      const passwordValid = await verifyPassword(password, profile.passwordHash);
-      if (!passwordValid) {
-        return false;
-      }
-
-      setUser(profile);
-      return true;
+      setUser(updatedUser);
+      await AsyncStorage.setItem(USER_PROFILE_STORAGE_KEY, JSON.stringify(updatedUser));
     } catch (error) {
-      console.error("Failed to login:", error);
+      console.error("Failed to update phone number:", error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
+      await AsyncStorage.removeItem(USER_PROFILE_STORAGE_KEY);
       setUser(null);
+      setHasExistingProfile(false);
     } catch (error) {
       console.error("Failed to logout:", error);
       throw error;
@@ -183,10 +228,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         isAuthenticated: user !== null,
         hasExistingProfile,
-        signup,
-        login,
+        signInWithGoogle,
         logout,
         updateLocation,
+        updatePhoneNumber,
       }}
     >
       {children}
