@@ -13,13 +13,13 @@ export type OnboardingPhase =
   | 'main';
 
 export function useOnboardingState(): OnboardingPhase {
-  const { isAuthenticated, isLoading: authLoading, hasExistingProfile } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const { isLanguageSelected } = useLanguage();
   const [phase, setPhase] = useState<OnboardingPhase>('loading');
 
   useEffect(() => {
     determinePhase();
-  }, [isAuthenticated, isLanguageSelected, authLoading, hasExistingProfile]);
+  }, [isAuthenticated, isLanguageSelected, authLoading]);
 
   const determinePhase = async () => {
     if (authLoading) {
@@ -42,15 +42,6 @@ export function useOnboardingState(): OnboardingPhase {
     const hasSetConsent = consentValue !== null;
     if (!hasSetConsent) {
       setPhase('consent');
-      return;
-    }
-
-    if (!isAuthenticated) {
-      if (hasExistingProfile) {
-        setPhase('login');
-      } else {
-        setPhase('auth');
-      }
       return;
     }
 

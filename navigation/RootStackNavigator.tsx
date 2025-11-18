@@ -4,7 +4,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LandingScreen from '@/screens/LandingScreen';
 import LanguageSelectionScreen from '@/screens/LanguageSelectionScreen';
 import PrivacyConsentScreen from '@/screens/PrivacyConsentScreen';
-import GoogleSignInScreen from '@/screens/GoogleSignInScreen';
 import MainTabNavigator from './MainTabNavigator';
 import { MainPhaseEffects } from '@/components/MainPhaseEffects';
 import { ThemedView } from '@/components/ThemedView';
@@ -15,7 +14,6 @@ export type RootStackParamList = {
   Landing: undefined;
   Language: undefined;
   Consent: undefined;
-  Auth: undefined;
   Main: undefined;
 };
 
@@ -59,7 +57,6 @@ export default function RootStackNavigator({ phase }: RootStackNavigatorProps) {
       <Stack.Screen name="Landing" component={LandingScreen} />
       <Stack.Screen name="Language" component={LanguageSelectionScreen} />
       <Stack.Screen name="Consent" component={PrivacyConsentScreen} />
-      <Stack.Screen name="Auth" component={GoogleSignInScreen} />
       <Stack.Screen name="Main">
         {() => <MainScreenWrapper phase={phase} />}
       </Stack.Screen>

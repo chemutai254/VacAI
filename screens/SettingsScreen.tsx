@@ -22,7 +22,7 @@ type SettingsScreenNavigationProp = NativeStackNavigationProp<SettingsStackParam
 export default function SettingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { t, language, setLanguage } = useLanguage();
-  const { user, logout, updateLocation } = useAuth();
+  const { user, updateLocation } = useAuth();
   const { theme } = useTheme();
   const navigation = useNavigation<SettingsScreenNavigationProp>();
   const [dataConsent, setDataConsent] = useState(false);
@@ -40,27 +40,6 @@ export default function SettingsScreen() {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setDataConsent(value);
     await storage.setDataConsent(value);
-  };
-
-  const handleLogout = () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
-        },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-            await logout();
-          },
-        },
-      ]
-    );
   };
 
   const handleUpdateLocation = async () => {
@@ -94,9 +73,11 @@ export default function SettingsScreen() {
             </View>
             <View style={styles.profileInfo}>
               <ThemedText style={styles.profileName}>
-                {user ? `${user.firstName} ${user.lastName}` : ""}
+                {user?.name || "Guest User"}
               </ThemedText>
-              <ThemedText style={styles.profileDetail}>{user?.phoneNumber}</ThemedText>
+              <ThemedText style={styles.guestModeLabel}>
+                Guest Mode - All features available
+              </ThemedText>
               {user?.location ? (
                 <ThemedText style={styles.profileDetail}>
                   Location: {user.location.latitude.toFixed(4)}, {user.location.longitude.toFixed(4)}
@@ -272,22 +253,6 @@ export default function SettingsScreen() {
           </View>
         </Card>
 
-        <Pressable
-          onPress={handleLogout}
-          style={({ pressed }) => [
-            styles.logoutButton,
-            {
-              backgroundColor: Colors.light.error,
-              opacity: pressed ? 0.8 : 1,
-            },
-          ]}
-        >
-          <Feather name="log-out" size={20} color="#FFFFFF" />
-          <ThemedText style={[styles.logoutText, { color: "#FFFFFF" }]}>
-            Sign Out
-          </ThemedText>
-        </Pressable>
-
         <View style={styles.footer}>
           <ThemedText style={styles.footerText}>
             Made for Kenyan communities
@@ -365,18 +330,11 @@ const styles = StyleSheet.create({
     color: Colors.light.mediumGray,
     marginBottom: Spacing.xs,
   },
-  logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.button,
-    marginTop: Spacing.xl,
-    gap: Spacing.sm,
-  },
-  logoutText: {
-    fontSize: 16,
-    fontWeight: "600",
+  guestModeLabel: {
+    fontSize: 12,
+    color: Colors.light.primary,
+    fontWeight: "500",
+    marginBottom: Spacing.xs,
   },
   footer: {
     paddingVertical: Spacing.xxl,
